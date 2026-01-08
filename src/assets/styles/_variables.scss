@@ -1,0 +1,119 @@
+$active-width: 70svw;
+
+// Color System
+$color-gold-primary: #d4af37;
+$color-gold-light: #e6c76f;
+$color-gold-dark: #b8941f;
+
+
+// $color-text-primary:#e0d8c0;
+// $color-text-secondary: #c9c4ba
+
+$color-text-primary:white;
+$color-text-secondary: white;
+$color-text-disabled: #7B7B7B;
+$color-text-brown: #464040;
+
+$color-bg-base: #0a0a0a;
+$color-bg-elevated: #1a1a1a;
+$color-bg-overlay: rgba(0, 0, 0, 0.85);
+$color-bg-modal: rgba(0, 0, 0, 0.95);
+
+$color-brown-dark: #1a1310;
+$color-brown-medium: #3a2a1a;
+$color-brown-light: #8b7355;
+$color-brown-accent: #4a3828;
+
+$color-error: #ff4444;
+$color-success: #4caf50;
+$color-info: #2196f3;
+
+// Typography
+$font-family-primary: 'Gruppo', sans-serif;
+$font-family-display: system-ui, -apple-system, sans-serif;
+
+$font-size-xs: 0.75rem;
+$font-size-sm: 0.875rem;
+$font-size-base: 1rem;
+$font-size-lg: 1.125rem;
+$font-size-xl: 1.25rem;
+$font-size-2xl: 1.5rem;
+$font-size-3xl: 2rem;
+$font-size-4xl: 3rem;
+$font-size-5xl: 5rem;
+
+$font-weight-normal: 400;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+$line-height-tight: 1;
+$line-height-normal: 1.5;
+$line-height-relaxed: 2;
+
+// Spacing Scale
+$spacing-xs: 0.25rem;
+$spacing-sm: 0.5rem;
+$spacing-md: 1rem;
+$spacing-lg: 1.5rem;
+$spacing-xl: 2rem;
+$spacing-2xl: 3rem;
+$spacing-3xl: 4rem;
+
+// Border Radius
+$radius-xs: 4px;
+$radius-sm: 6px;
+$radius-base: 8px;
+$radius-lg: 12px;
+$radius-xl: 18px;
+
+// Transitions
+$transition-fast: 0.2s ease;
+$transition-base: 0.3s ease;
+$transition-slow: 0.5s ease-out;
+
+// Shadows & Glows
+$shadow-sm: 0 2px 8px rgba(255, 255, 255, 0.3);
+$shadow-md: 0 4px 16px rgba(255, 255, 255, 0.4);
+$shadow-lg: 0 8px 32px rgba(255, 255, 255, 0.5);
+
+$glow-gold-sm: 0 0 10px rgba(255, 255, 255, 0.3);
+$glow-gold-md: 0 0 20px rgba(255, 255, 255, 0.4);
+$glow-gold-lg: 0 4px 20px rgba(255, 255, 255, 0.5);
+
+:root {
+  --active-width: #{$active-width};
+  
+  // Colors
+  --color-gold-primary: #{$color-gold-primary};
+  --color-gold-light: #{$color-gold-light};
+  --color-gold-dark: #{$color-gold-dark};
+  
+  --color-text-primary: #{$color-text-primary};
+  --color-text-secondary: #{$color-text-secondary};
+  --color-text-disabled: #{$color-text-disabled};
+  
+  --color-bg-base: #{$color-bg-base};
+  --color-bg-elevated: #{$color-bg-elevated};
+  --color-bg-overlay: #{$color-bg-overlay};
+  
+  --color-brown-dark: #{$color-brown-dark};
+  --color-brown-medium: #{$color-brown-medium};
+  --color-brown-light: #{$color-brown-light};
+  
+  --color-error: #{$color-error};
+  --color-success: #{$color-success};
+  
+  // Typography
+  --font-family-primary: #{$font-family-primary};
+  
+  // Spacing
+  --spacing-md: #{$spacing-md};
+  --spacing-lg: #{$spacing-lg};
+  --spacing-xl: #{$spacing-xl};
+  
+  // Border Radius
+  --radius-base: #{$radius-base};
+  
+  // Transitions
+  --transition-base: #{$transition-base};
+}

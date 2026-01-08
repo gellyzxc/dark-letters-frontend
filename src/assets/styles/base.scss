@@ -1,0 +1,21 @@
+@import 'reset.css';
+@import url('https://fonts.googleapis.com/css2?family=Gruppo&display=swap');
+
+* {
+  user-select: none;
+  font-family: 'Gruppo', sans-serif;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+body {
+  background-color: #010301;
+  max-height: 1080px;
+  max-width: 1920px;
+  width: 1920px;
+  // max-height: 963px;
+  // display: flex;
+  // flex-direction: row;
+  // justify-content: center;
+}

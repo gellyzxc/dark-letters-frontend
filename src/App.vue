@@ -1,0 +1,16 @@
+<template>
+  <div class="app-container">
+    <router-view />
+  </div>
+</template>
+
+<style scoped>
+.app-container {
+  max-width: 1920px;
+  max-height: 1080px;
+  /* width: 100vw;
+  height: 100vh; */
+  margin: 0 auto;
+  /* position: relative; */
+}
+</style>
