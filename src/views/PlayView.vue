@@ -197,10 +197,10 @@ export default {
       open: false,
       selectedGame: null,
       gameImages: {
-        1: pic3,
-        2: pic2,
-        3: pic1,
-        4: pic4
+        'training': pic1,
+        'dungeon': pic2,
+        'story': pic2,
+        'boss': pic4,
       }
     }
   },
@@ -209,22 +209,29 @@ export default {
       this.selectedGame = game
       this.open = true
     },
-    getGameImage(gameId) {
-      return this.gameImages[gameId] || pic1
+    getGameImage(gameName) {
+      return this.gameImages[gameName] || pic1
     },
     startGame() {
       if (this.selectedGame) {
-        this.$router.push(`/game/${this.selectedGame.id}`)
+        this.$router.push(`/game/${this.selectedGame.id}?name=${this.selectedGame.name}&time=${this.selectedGame.time}`)
       }
     }
   },
   async mounted() {
     try {
       await this.gameStore.fetchGameTypes()
-      this.games = this.gameStore.gameTypes.map(game => ({
-        ...game,
-        image: this.getGameImage(game.id)
-      }))
+      const gameOrder = ['training', 'dungeon', 'story', 'boss']
+      this.games = this.gameStore.gameTypes
+        .map(game => ({
+          ...game,
+          image: this.getGameImage(game.name)
+        }))
+        .sort((a, b) => {
+          const indexA = gameOrder.indexOf(a.name)
+          const indexB = gameOrder.indexOf(b.name)
+          return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB)
+        })
     } catch (error) {
       console.error('Failed to load game types:', error)
     }

@@ -19,7 +19,7 @@
     </div>
   </div>
   <modal-component :open="showPreviewModal" @will-dismiss="showPreviewModal = false">
-    <frame-component class="item-frame" style="max-width: 40svw;">
+    <frame-component class="item-frame" style="max-width: 40svw; overflow: hidden;">
       <div class="item-card preview-item-card" v-if="selectedItem">
         <div class="glow" :class="`glow-${selectedItem.rarity}`"></div>
         <div class="item-content-flex">
@@ -42,12 +42,12 @@
       </div>
     </frame-component>
   </modal-component>
-  <modal-component :open="showRewardModal" @will-dismiss="showRewardModal = false">
-    <div class="item-drop-animation" @click.stop style="max-width: 40svw !important;">
+  <modal-component :open="showRewardModal" @will-dismiss="closeRewardModal">
+    <div class="item-drop-animation" @click="closeRewardModal" style="max-width: 40svw !important;">
       <div class="particles">
         <div v-for="i in 20" :key="i" class="particle" :style="getParticleStyle(i)"></div>
       </div>
-      <frame-component class="item-frame">
+      <frame-component class="item-frame" style="overflow: hidden;">
         <div class="item-card reward-item-card" v-if="selectedItem">
           <div class="glow" :class="`glow-${selectedItem.rarity}`"></div>
           <div class="item-icon">
@@ -295,6 +295,7 @@
   justify-content: center;
   font-family: 'JetBrains Mono', 'Fira Mono', 'Consolas', monospace;
   color: $color-text-primary;
+  overflow: hidden;
 
   .glow {
     position: absolute;
@@ -722,13 +723,25 @@ export default {
     async purchaseItem() {
       try {
         console.log('Purchasing item:', this.selectedItem);
+        await this.inventoryStore.updateItem(this.selectedItem.id, {
+          is_in_shop: false
+        });
         this.showPreviewModal = false;
         setTimeout(() => {
           this.showRewardModal = true;
         }, 300);
+        setTimeout(async () => {
+          this.showRewardModal = false;
+          await this.loadShopItems();
+        }, 3000);
       } catch (error) {
         console.error('Failed to purchase item:', error);
+        alert('Failed to purchase item. Please try again.');
       }
+    },
+    async closeRewardModal() {
+      this.showRewardModal = false;
+      await this.loadShopItems();
     },
     getParticleStyle(index) {
       const angle = (index / 20) * Math.PI * 2;

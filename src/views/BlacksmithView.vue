@@ -1,16 +1,57 @@
 <template>
   <div class="page inventory-view">
+    <transition name="fade">
+      <div v-if="showItemTooltip && hoveredItem" class="item-tooltip" :style="tooltipPosition">
+        <frame-component class="tooltip-frame">
+          <div class="tooltip-content">
+            <div class="item-name">{{ hoveredItem.name }}</div>
+            <div class="item-description">{{ hoveredItem.description || 'No description.' }}</div>
+            <div class="item-bonuses" v-if="hoveredItem.stats && hoveredItem.stats.length > 0">
+              <div v-for="(stat, index) in hoveredItem.stats" :key="index" class="bonus-line">
+                <span class="bonus-label">{{ stat.label }} <span class="bonus-value">{{ stat.value }}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </frame-component>
+      </div>
+    </transition>
+    <transition name="fade">
+      <div v-if="showReforgedTooltip && reforgedItem" class="item-tooltip reforged-tooltip"
+        :style="reforgedTooltipPosition">
+        <frame-component class="tooltip-frame">
+          <div class="tooltip-content forgeed-tooltip-content">
+            <div class="reforge-header">
+              <div class="item-name">{{ reforgedItem.name }}</div>
+              <div class="reforge-info">
+                <div class="gold-info">Gold: {{ character ? character.gold : 0 }}</div>
+                <div class="reforge-cost">Reforge: {{ reforgeCost }} gold</div>
+              </div>
+            </div>
+            <div class="item-description">{{ reforgedItem.description || 'Reforged item.' }}</div>
+            <div class="item-bonuses" v-if="reforgedItem.stats && reforgedItem.stats.length > 0">
+              <div v-for="(stat, index) in reforgedItem.stats" :key="index" class="bonus-line">
+                <span class="bonus-label">{{ stat.label }} <span class="bonus-value">{{ stat.value }}</span>
+                </span>
+              </div>
+            </div>
+            <div class="reforge-actions" v-if="hasReforged">
+              <button class="accept-btn" @click="acceptReforge">Accept</button>
+            </div>
+          </div>
+        </frame-component>
+      </div>
+    </transition>
     <div class="main">
       <img src="@/assets/images/frames/forge-iventory-frame.png" />
       <div class="content">
         <div class="forge">
           <drag-drop-component class="equipment-slot" group-id="inventory" :item-data="forgeItem"
             @item-dropped="onForgeDropped($event)">
-            <div v-if="forgeItem" class="item">
-              <img v-if="forgeItem.photo" :src="getImageUrl(forgeItem.photo)" :alt="forgeItem.name"
+            <div v-if="forgeItem" class="item" @mouseenter="onItemHover(forgeItem, $event)" @mouseleave="onItemLeave">
+              <img v-if="forgeItem.photo" style="max-height: 110px;" :src="getImageUrl(forgeItem.photo)" :alt="forgeItem.name"
                 class="item-image" />
               <div v-else class="icon">{{ forgeItem.icon || '📦' }}</div>
-              <span>{{ forgeItem.name }}</span>
             </div>
             <template #placeholder>
             </template>
@@ -51,7 +92,8 @@
         <div class="inventory">
           <drag-drop-component v-for="(slot, index) in inventorySlots" :key="index" class="slot" group-id="inventory"
             :item-data="slot.item" @item-dropped="onItemDropped('inventory', index, $event)">
-            <div v-if="slot.item && isFirstSlotOfItem(index)" class="item" :style="getItemStyle(slot.item, index)">
+            <div v-if="slot.item && isFirstSlotOfItem(index)" class="item" :style="getItemStyle(slot.item, index)"
+              @mouseenter="onItemHover(slot.item, $event)" @mouseleave="onItemLeave">
               <img v-if="slot.item.photo" :src="getImageUrl(slot.item.photo)" :alt="slot.item.name"
                 class="item-image" />
               <div v-else class="icon">{{ slot.item.icon || '📦' }}</div>
@@ -124,6 +166,24 @@
 
         &.opening {
           animation: crateShake $transition-slow;
+        }
+      }
+
+      .gold-display {
+        position: absolute;
+        left: 26px;
+        top: 60px;
+        font-size: 1.2rem;
+        color: #FFD700;
+        font-weight: 600;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.8);
+
+        .gold-amount {
+          display: inline-block;
+          padding: 0.3rem 0.8rem;
+          background: rgba(0, 0, 0, 0.6);
+          border-radius: 4px;
+          border: 1px solid rgba(255, 215, 0, 0.3);
         }
       }
 
@@ -271,6 +331,144 @@
   90% {
     transform: translateX(0) rotate(0deg);
   }
+}
+
+.item-tooltip {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+
+  .tooltip-frame {
+    width: 30svw !important;
+  }
+
+  .tooltip-content {
+    &.forgeed-tooltip-content {
+      width: calc(100% - 2rem);
+    }
+
+    background-color: black;
+    padding: 0.8rem 1rem;
+    padding-bottom: 4rem;
+    min-width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    position: relative;
+
+    .reforge-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.2rem;
+
+      .reforge-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.2rem;
+
+        .gold-info {
+          font-size: 0.9rem;
+          color: #FFD700;
+          font-weight: 600;
+        }
+
+        .reforge-cost {
+          font-size: 0.9rem;
+          color: #DAA520;
+          font-weight: 600;
+        }
+      }
+    }
+
+    .item-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffffff;
+      letter-spacing: 0.01em;
+      line-height: 1.2;
+      text-shadow: 0 1px 2px #000;
+    }
+
+    .item-description {
+      font-size: 0.95rem;
+      color: #cccccc;
+      line-height: 1.4;
+      word-break: break-word;
+      text-shadow: 0 1px 2px #000;
+    }
+
+    .item-bonuses {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      margin-top: 0.4rem;
+
+      .bonus-line {
+        font-size: 0.9rem;
+        color: #ffffff;
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        text-shadow: 0 1px 2px #000;
+
+        .bonus-label {
+          color: #cccccc;
+        }
+
+        .bonus-value {
+          font-weight: 600;
+          color: #ffffff;
+        }
+      }
+    }
+
+    .reforge-actions {
+      position: absolute;
+      bottom: 5.5rem;
+      left: 1rem;
+      right: 1rem;
+      display: flex;
+      justify-content: center;
+      gap: 0.8rem;
+      pointer-events: all;
+
+      button {
+        flex: 1;
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: inherit;
+
+        &.accept-btn {
+          color: #000;
+        }
+
+        &:active:not(:disabled) {
+          transform: translateY(0);
+        }
+      }
+    }
+  }
+}
+
+.reforged-tooltip {
+  pointer-events: all;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 
 @keyframes itemAppear {
@@ -514,7 +712,17 @@ export default {
       forgeItem: null,
       openingReforge: null,
       reforgeItem: null,
-      inventorySlots: Array(64).fill().map(() => ({ item: null }))
+      inventorySlots: Array(64).fill().map(() => ({ item: null })),
+      showItemTooltip: false,
+      hoveredItem: null,
+      hoverTimeout: null,
+      tooltipPosition: { top: '0px', left: '0px' },
+      showReforgedTooltip: false,
+      reforgedItem: null,
+      reforgedTooltipPosition: { top: '0px', left: '0px' },
+      totalGoldSpent: 0,
+      character: null,
+      hasReforged: false
     }
   },
   computed: {
@@ -526,9 +734,27 @@ export default {
         if (!photoPath) return null;
         return `${BASE_URL}/${photoPath}`;
       };
+    },
+    reforgeCost() {
+      if (!this.forgeItem || !this.forgeItem.price) return 0;
+      return Math.ceil(this.forgeItem.price * 0.1);
+    },
+    canReforge() {
+      if (!this.character || !this.reforgeCost) return false;
+      return this.character.gold >= this.reforgeCost;
     }
   },
   methods: {
+    async loadCharacter() {
+      try {
+        const { useUserStore } = await import('@/stores/user');
+        const userStore = useUserStore();
+        const character = await userStore.fetchCharacter();
+        this.character = character;
+      } catch (error) {
+        console.error('Failed to load character:', error);
+      }
+    },
     isFirstSlotOfItem(index) {
       const item = this.inventorySlots[index]?.item;
       if (!item) return false;
@@ -644,6 +870,7 @@ export default {
         }
         this.forgeItem = droppedData;
         this.inventorySlots = newSlots;
+        this.showForgeTooltip();
       } else if (this.forgeItem && this.forgeItem.id === droppedData?.id) {
         return;
       }
@@ -681,36 +908,138 @@ export default {
         this.updateItemPosition(droppedData, slotIndex);
       }
     },
-    onReforgeClick() {
-      if (!this.forgeItem || this.openingReforge || this.reforgeItem) return;
-      this.openingReforge = true;
-      setTimeout(() => {
-        this.openingReforge = null;
-        this.showReforgeItem();
-      }, 900);
+    async onReforgeClick() {
+      if (!this.forgeItem || !this.canReforge) return;
+      await this.doReforge();
     },
-    showReforgeItem() {
+    showForgeTooltip() {
       if (!this.forgeItem) return;
-      const rarityMap = {
-        'amulet': 'mystical',
-        'ring': 'mystical',
-        'belt': 'common',
-        'blade': 'common',
-        'blade_and_shield': 'legendary',
-        'chest': 'common',
-        'cloak': 'mystical',
-        'mantle': 'mystical',
-        'staff': 'legendary'
-      };
-      this.reforgeItem = {
-        ...this.forgeItem,
-        rarity: rarityMap[this.forgeItem.type] || 'common',
-        stats: this.forgeItem.stats?.map(stat => ({
+      this.reforgedItem = { ...this.forgeItem };
+      this.hasReforged = false;
+      const forgeElement = document.querySelector('.forge');
+      if (forgeElement) {
+        const rect = forgeElement.getBoundingClientRect();
+        const margin = 10;
+        let top = rect.top - margin;
+        let left = rect.left + rect.width / 2;
+        let transform = 'translate(-50%, -100%)';
+        this.reforgedTooltipPosition = {
+          top: `${top}px`,
+          left: `${left}px`,
+          transform: transform
+        };
+      }
+      this.showReforgedTooltip = true;
+    },
+    async doReforge() {
+      if (!this.forgeItem || !this.canReforge) return;
+      this.character.gold -= this.reforgeCost;
+      this.totalGoldSpent += this.reforgeCost;
+      this.hasReforged = true;
+      const rerolledStats = this.forgeItem.stats?.map(stat => {
+        const minValue = stat.minValue || 1;
+        const maxValue = stat.maxValue || stat.currentValue || stat.value;
+        const newValue = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
+        return {
           ...stat,
-          label: stat.label,
-          value: stat.value
-        })) || []
+          value: newValue,
+          currentValue: newValue
+        };
+      }) || [];
+      this.reforgedItem = {
+        ...this.forgeItem,
+        stats: rerolledStats
       };
+      const forgeElement = document.querySelector('.forge');
+      if (forgeElement) {
+        const rect = forgeElement.getBoundingClientRect();
+        const tooltipWidth = window.innerWidth * 0.3;
+        const margin = 10;
+        let top = rect.top - margin;
+        let left = rect.left + rect.width / 2;
+        let transform = 'translate(-50%, -100%)';
+        this.reforgedTooltipPosition = {
+          top: `${top}px`,
+          left: `${left}px`,
+          transform: transform
+        };
+      }
+      this.showReforgedTooltip = true;
+    },
+    async acceptReforge() {
+      if (!this.reforgedItem) return;
+      try {
+        const statsUpdate = this.reforgedItem.stats.map((stat, index) => {
+          const originalStat = this.forgeItem.stats[index];
+          return {
+            id: originalStat.id,
+            buff_skill: originalStat.buffSkill,
+            buff_type: originalStat.buffType,
+            current_value: stat.currentValue || stat.value,
+            max_value: originalStat.maxValue,
+            min_value: originalStat.minValue,
+            tier: originalStat.tier,
+            visual_text: `${stat.label}`
+          };
+        });
+        await this.inventoryStore.updateItem(this.reforgedItem.id, { stats: statsUpdate });
+        if (this.totalGoldSpent > 0) {
+          const { useCharacterStore } = await import('@/stores/character');
+          const characterStore = useCharacterStore();
+          await characterStore.updateCharacter(this.character.id, { gold: this.character.gold });
+        }
+        this.forgeItem = null;
+        this.showReforgedTooltip = false;
+        this.reforgedItem = null;
+        this.totalGoldSpent = 0;
+        this.hasReforged = false;
+        await this.loadInventory();
+        await this.loadCharacter();
+      } catch (error) {
+        console.error('Failed to accept reforge:', error);
+        alert('Failed to save reforged item');
+      }
+    },
+    onItemHover(item, event) {
+      if (!item || this.showReforgedTooltip) return;
+      if (this.hoverTimeout) {
+        clearTimeout(this.hoverTimeout);
+      }
+      this.hoverTimeout = setTimeout(() => {
+        const rect = event.target.getBoundingClientRect();
+        const tooltipWidth = window.innerWidth * 0.3;
+        const tooltipHeight = 200;
+        const margin = 10;
+        let top = rect.top - margin;
+        let left = rect.left + rect.width / 2;
+        let transform = 'translate(-50%, -100%)';
+        if (top - tooltipHeight < margin) {
+          top = rect.bottom + margin;
+          transform = 'translate(-50%, 0)';
+        }
+        const tooltipLeft = left - tooltipWidth / 2;
+        const tooltipRight = left + tooltipWidth / 2;
+        if (tooltipLeft < margin) {
+          left = margin + tooltipWidth / 2;
+        } else if (tooltipRight > window.innerWidth - margin) {
+          left = window.innerWidth - margin - tooltipWidth / 2;
+        }
+        this.tooltipPosition = {
+          top: `${top}px`,
+          left: `${left}px`,
+          transform: transform
+        };
+        this.hoveredItem = item;
+        this.showItemTooltip = true;
+      }, 300);
+    },
+    onItemLeave() {
+      if (this.hoverTimeout) {
+        clearTimeout(this.hoverTimeout);
+        this.hoverTimeout = null;
+      }
+      this.showItemTooltip = false;
+      this.hoveredItem = null;
     },
     getParticleStyle(index) {
       const angle = (index / 20) * Math.PI * 2;
@@ -728,6 +1057,7 @@ export default {
   },
   async mounted() {
     await this.loadInventory();
+    await this.loadCharacter();
     console.log('BlacksmithView mounted with inventory data');
   },
   setup() {

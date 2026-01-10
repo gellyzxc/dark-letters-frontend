@@ -1,12 +1,55 @@
 <template>
   <div class="page inventory-view">
+    <transition name="fade">
+      <div v-if="showItemTooltip && hoveredItem" class="item-tooltip" :style="tooltipPosition">
+        <frame-component class="tooltip-frame">
+          <div class="tooltip-content">
+            <div class="item-name">{{ hoveredItem.name }}</div>
+            <div class="item-description">{{ hoveredItem.description || 'No description.' }}</div>
+            <div class="item-bonuses" v-if="hoveredItem.stats && hoveredItem.stats.length > 0">
+              <div v-for="(stat, index) in hoveredItem.stats" :key="index" class="bonus-line">
+                <span class="bonus-label">{{ stat.label }} <span class="bonus-value">{{ stat.value }}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </frame-component>
+      </div>
+    </transition>
     <div class="main">
       <img src="@/assets/images/frames/inventory-frame-tab.png" />
       <div class="content">
+        <div class="stats-left">
+          <span class="heading" v-if="character">{{ character.race?.name }}</span>
+          <span class="heading" v-if="character">{{ character.class?.name }}</span>
+          <span v-if="character"><span class="value">+{{ character.intellect }}</span> intelligence</span>
+          <span v-if="character"><span class="value">+{{ character.strength }}</span> strength</span>
+          <span v-if="character"><span class="value">+{{ character.agility }}</span> agility</span>
+          <span v-if="character" class="mt-1"><span class="value">+{{ character.damage }}</span> damage</span>
+          <span v-if="character"><span class="value">+{{ Math.round(character.critical_hit_chance * 100) }}%</span> krit
+            chance</span>
+          <span v-if="character"><span class="value">+{{ Math.round(character.critical_multiplier) }}%</span> krit
+            damage</span>
+          <span v-if="character"><span class="value">+{{ character.defence }}</span> defence</span>
+          <span v-if="character"><span class="value">+{{ character.health_points }}</span> health points</span>
+          <span v-if="character"><span class="value">+{{ Math.round(character.block_chance * 100) }}%</span> block
+            chance</span>
+          <span v-if="character"><span class="value">+{{ character.mana }}</span> mana</span>
+          <span v-if="character"><span class="value">+{{ Math.round(character.mana_chance * 100) }}%</span> mana
+            chance</span>
+        </div>
+        <div class="stats-bottom">
+          <span v-if="character">{{ character.lvl }} lvl</span>
+          <div class="col">
+            <span v-if="character">{{ character.experience }} exp</span>
+            <span v-if="character">{{ character.gold }} gold</span>
+          </div>
+        </div>
         <div class="sword">
-          <drag-drop-component class="equipment-slot" group-id="inventory" :item-data="equippedSword"
-            @item-dropped="onEquipmentDropped('sword', $event)">
-            <div v-if="equippedSword" class="item">
+          <drag-drop-component class="equipment-slot" style="display: flex;" group-id="inventory"
+            :item-data="equippedSword" @item-dropped="onEquipmentDropped('sword', $event)">
+            <div v-if="equippedSword" class="item" @mouseenter="onItemHover(equippedSword, $event)"
+              @mouseleave="onItemLeave">
               <img v-if="equippedSword.photo" :src="getImageUrl(equippedSword.photo)" :alt="equippedSword.name"
                 class="item-image" />
               <div v-else class="icon">{{ equippedSword.icon || '📦' }}</div>
@@ -16,9 +59,10 @@
           </drag-drop-component>
         </div>
         <div class="cloth">
-          <drag-drop-component class="equipment-slot" group-id="inventory" :item-data="equippedCloth"
-            @item-dropped="onEquipmentDropped('cloth', $event)">
-            <div v-if="equippedCloth" class="item">
+          <drag-drop-component class="equipment-slot" style="display: flex;" group-id="inventory"
+            :item-data="equippedCloth" @item-dropped="onEquipmentDropped('cloth', $event)">
+            <div v-if="equippedCloth" class="item" @mouseenter="onItemHover(equippedCloth, $event)"
+              @mouseleave="onItemLeave">
               <img v-if="equippedCloth.photo" :src="getImageUrl(equippedCloth.photo)" :alt="equippedCloth.name"
                 class="item-image" />
               <div v-else class="icon">{{ equippedCloth.icon || '📦' }}</div>
@@ -29,9 +73,10 @@
           </drag-drop-component>
         </div>
         <div class="amulet">
-          <drag-drop-component class="equipment-slot" group-id="inventory" :item-data="equippedAmulet"
-            @item-dropped="onEquipmentDropped('amulet', $event)">
-            <div v-if="equippedAmulet" class="item">
+          <drag-drop-component class="equipment-slot" group-id="inventory" style="display: flex;"
+            :item-data="equippedAmulet" @item-dropped="onEquipmentDropped('amulet', $event)">
+            <div v-if="equippedAmulet" class="item" @mouseenter="onItemHover(equippedAmulet, $event)"
+              @mouseleave="onItemLeave">
               <img v-if="equippedAmulet.photo" :src="getImageUrl(equippedAmulet.photo)" :alt="equippedAmulet.name"
                 class="item-image" />
               <div v-else class="icon">{{ equippedAmulet.icon || '📦' }}</div>
@@ -44,7 +89,8 @@
         <div class="inventory">
           <drag-drop-component v-for="(slot, index) in inventorySlots" :key="index" class="slot" group-id="inventory"
             :item-data="slot.item" @item-dropped="onItemDropped('inventory', index, $event)">
-            <div v-if="slot.item && isFirstSlotOfItem(index)" class="item" :style="getItemStyle(slot.item, index)">
+            <div v-if="slot.item && isFirstSlotOfItem(index)" class="item" :style="getItemStyle(slot.item, index)"
+              @mouseenter="onItemHover(slot.item, $event)" @mouseleave="onItemLeave">
               <img v-if="slot.item.photo" :src="getImageUrl(slot.item.photo)" :alt="slot.item.name"
                 class="item-image" />
               <div v-else class="icon">{{ slot.item.icon || '📦' }}</div>
@@ -55,7 +101,9 @@
           </drag-drop-component>
         </div>
         <div class="sell-zone">
-          <drag-drop-component class="sell-drop-area" group-id="inventory" @item-dropped="onSellItem">
+          <drag-drop-component class="sell-drop-area"
+            style="display: flex; align-items: center; justify-content: center;" group-id="inventory"
+            @item-dropped="onSellItem">
             <template #placeholder>
               <div class="sell-placeholder">
                 <div class="sell-text">Drag here to sell</div>
@@ -100,8 +148,57 @@
 
       .sword,
       .cloth,
-      .amulet {
+      .amulet,
+      .stats-left,
+      .stats-bottom {
         position: absolute;
+      }
+
+      .stats-bottom {
+        padding: 0 $spacing-sm;
+        width: calc(583px - 2 * $spacing-sm);
+        height: 81px;
+        bottom: 23px;
+        right: 24px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+        color: white;
+        font-size: 2rem;
+
+        .col {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 0.4rem;
+        }
+      }
+
+      .stats-left {
+        width: 240px;
+        top: 0;
+        left: -256px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: flex-start;
+        gap: 0.4rem;
+
+        span {
+          color: #999;
+          font-size: 1.1rem;
+        }
+
+        .heading {
+          color: white;
+          font-size: 1.3rem;
+          font-weight: 500;
+        }
+
+        .mt-1 {
+          margin-top: 0.6rem;
+        }
       }
 
       .sword {
@@ -192,7 +289,7 @@
               font-family: $font-family-primary;
               text-transform: uppercase;
               letter-spacing: 0.05em;
-              font-weight: $font-weight-semibold;
+              font-weight: 500;
             }
           }
         }
@@ -280,22 +377,100 @@
     }
   }
 }
+
+.item-tooltip {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+
+  .tooltip-frame {
+    width: 30svw !important;
+  }
+
+  .tooltip-content {
+    background-color: black;
+    padding: 0.8rem 1rem;
+    min-width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+
+    .item-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffffff;
+      letter-spacing: 0.01em;
+      line-height: 1.2;
+      text-shadow: 0 1px 2px #000;
+      margin-bottom: 0.2rem;
+    }
+
+    .item-description {
+      font-size: 0.95rem;
+      color: #cccccc;
+      line-height: 1.4;
+      word-break: break-word;
+      text-shadow: 0 1px 2px #000;
+    }
+
+    .item-bonuses {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      margin-top: 0.4rem;
+
+      .bonus-line {
+        font-size: 0.9rem;
+        color: #ffffff;
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        text-shadow: 0 1px 2px #000;
+
+        .bonus-label {
+          color: #cccccc;
+        }
+
+        .bonus-value {
+          font-weight: 600;
+          color: #ffffff;
+        }
+      }
+    }
+  }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>
 <script>
 import DragDropComponent from "@/components/DragDropComponent.vue";
+import FrameComponent from "@/components/game/FrameComponent.vue";
 import { useInventoryStore } from "@/stores/inventory";
 import { transformApiItem, positionToIndex, indexToPosition } from "@/utils/itemHelpers";
 const API_BASE_URL = 'http://147.45.253.24:5035/';
 const BASE_URL = API_BASE_URL.replace('/api/v1', '');
 export default {
   name: "InventoryView",
-  components: { DragDropComponent },
+  components: { DragDropComponent, FrameComponent },
   data() {
     return {
+      character: null,
       equippedSword: null,
       equippedCloth: null,
       equippedAmulet: null,
-      inventorySlots: Array(64).fill().map(() => ({ item: null }))
+      inventorySlots: Array(64).fill().map(() => ({ item: null })),
+      showItemTooltip: false,
+      hoveredItem: null,
+      hoverTimeout: null,
+      tooltipPosition: { top: '0px', left: '0px' }
     }
   },
   computed: {
@@ -310,6 +485,47 @@ export default {
     }
   },
   methods: {
+    onItemHover(item, event) {
+      if (!item) return;
+      if (this.hoverTimeout) {
+        clearTimeout(this.hoverTimeout);
+      }
+      this.hoverTimeout = setTimeout(() => {
+        const rect = event.target.getBoundingClientRect();
+        const tooltipWidth = window.innerWidth * 0.3;
+        const tooltipHeight = 200;
+        const margin = 10;
+        let top = rect.top - margin;
+        let left = rect.left + rect.width / 2;
+        let transform = 'translate(-50%, -100%)';
+        if (top - tooltipHeight < margin) {
+          top = rect.bottom + margin;
+          transform = 'translate(-50%, 0)';
+        }
+        const tooltipLeft = left - tooltipWidth / 2;
+        const tooltipRight = left + tooltipWidth / 2;
+        if (tooltipLeft < margin) {
+          left = margin + tooltipWidth / 2;
+        } else if (tooltipRight > window.innerWidth - margin) {
+          left = window.innerWidth - margin - tooltipWidth / 2;
+        }
+        this.tooltipPosition = {
+          top: `${top}px`,
+          left: `${left}px`,
+          transform: transform
+        };
+        this.hoveredItem = item;
+        this.showItemTooltip = true;
+      }, 300);
+    },
+    onItemLeave() {
+      if (this.hoverTimeout) {
+        clearTimeout(this.hoverTimeout);
+        this.hoverTimeout = null;
+      }
+      this.showItemTooltip = false;
+      this.hoveredItem = null;
+    },
     isFirstSlotOfItem(index) {
       const item = this.inventorySlots[index]?.item;
       if (!item) return false;
@@ -326,6 +542,16 @@ export default {
       if (targetCol + width > cols) return false;
       if (targetRow + height > rows) return false;
       return true;
+    },
+    async loadCharacter() {
+      try {
+        const { useUserStore } = await import('@/stores/user');
+        const userStore = useUserStore();
+        const character = await userStore.fetchCharacter();
+        this.character = character;
+      } catch (error) {
+        console.error('Failed to load character:', error);
+      }
     },
     async loadInventory() {
       try {
@@ -524,6 +750,7 @@ export default {
   },
   async mounted() {
     await this.loadInventory();
+    await this.loadCharacter();
     console.log('InventoryView mounted with inventory data');
   },
   setup() {

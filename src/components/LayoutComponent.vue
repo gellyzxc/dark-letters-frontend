@@ -7,7 +7,7 @@
       </span>
     </div>
     <div class="item tag" style="display: flex; flex-direction: row; gap: 0.5rem;"> 
-      <div class="icon" :style="{ backgroundImage: `url(${currentAvatarImage})` }">
+      <div class="icon" :style="{ backgroundImage: `url(${BASE_URL}${avatar})` }">
         
       </div>
       <div style="display: flex; flex-direction: column; gap: 0.2rem;">
@@ -98,9 +98,6 @@ import humanIcon from '@/assets/images/classicons/human.png'
 import mageIcon from '@/assets/images/classicons/mage.png'
 import warriorIcon from '@/assets/images/classicons/warrior.png'
 
-const API_BASE_URL = 'http://147.45.253.24:5035/';
-const BASE_URL = API_BASE_URL.replace('/api/v1', '');
-
 export default {
   name: "LayoutComponent",
   components: {
@@ -108,6 +105,8 @@ export default {
   },
   setup() {
     const userStore = useUserStore()
+
+    userStore.fetchCurrentUser()
     
     const classIcons = {
       assasin: assasinIcon,
@@ -119,30 +118,20 @@ export default {
       warrior: warriorIcon
     }
     
-    const avatars = [
-      { id: 1, name: 'assasin', image: assasinIcon },
-      { id: 2, name: 'dwarf', image: dwarfIcon },
-      { id: 3, name: 'elf', image: elfIcon },
-      { id: 4, name: 'gnom', image: gnomIcon },
-      { id: 5, name: 'human', image: humanIcon },
-      { id: 6, name: 'mage', image: mageIcon },
-      { id: 7, name: 'warrior', image: warriorIcon }
-    ]
-    
-    const currentAvatarImage = computed(() => {
-      const currentAvatarPath = userStore.user?.avatar
-      if (!currentAvatarPath) return warriorIcon
-      
-      const foundAvatar = avatars.find(a => currentAvatarPath.includes(`${a.id}.png`))
-      return foundAvatar ? foundAvatar.image : warriorIcon
-    })
-    
-    const userName = computed(() => userStore.user?.login || 'AlexandV')
+    const userName = computed(() => userStore.user?.login)
+    const time = computed(() => userStore.user?.created_at)
+    const frame = computed(() => userStore.user?.frame)
+    const avatar = computed(() => userStore.user?.avatar)
+
+    const API_BASE_URL = 'http://147.45.253.24:5035/';
+    const BASE_URL = API_BASE_URL.replace('/api/v1', '');
     
     return {
-      classIcons,
-      currentAvatarImage,
-      userName
+      userName,
+      frame,
+      time,
+      avatar,
+      BASE_URL
     }
   },
   data() {

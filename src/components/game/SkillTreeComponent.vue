@@ -51,7 +51,8 @@
         </div>
         <div class="ability-points">
           <span class="points-label">Ability point</span>
-          <span class="points-value">{{ characterStats.available_skill_points }}/{{ characterStats.total_skill_points }}</span>
+          <span class="points-value">{{ characterStats.available_skill_points }}/{{ characterStats.total_skill_points
+            }}</span>
         </div>
       </div>
     </frame-component>
@@ -61,9 +62,9 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useCharacterStore } from '@/stores/character'
 import * as PIXI from 'pixi.js'
-import nodesData from '@/nodes.json'
 import FrameComponent from '@/components/game/FrameComponent.vue'
 import SkillsBackground from '@/assets/images/background/skills.png'
+import apiClient, { API_BASE_URL } from '@/api/client'
 import Skill1 from '@/assets/images/skills/1.png'
 import Skill2 from '@/assets/images/skills/2.png'
 import Skill3 from '@/assets/images/skills/3.png'
@@ -111,12 +112,12 @@ const skillImages = {
   '22': Skill22
 }
 const characterStore = useCharacterStore()
-
+const API_BASE_URL_CONST = API_BASE_URL
+const BASE_URL = API_BASE_URL_CONST.replace('/api/v1', '')
 const pixiContainer = ref(null)
+const nodesData = ref(null)
 let app = null
 let viewport = null
-
-// Computed свойство для характеристик персонажа
 const characterStats = computed(() => ({
   agility: characterStore.character?.agility || 0,
   intellect: characterStore.character?.intellect || 0,
@@ -215,11 +216,28 @@ function updateEdge(line) {
     line.stroke({ width: 3, color: 0x4a3828, alpha: 0.6 })
   }
 }
-async function createNode(nodeData, nodesContainer, allEdges, app, tooltipsContainer) {
+async function createNode(nodeData, nodesContainer, allEdges, app, tooltipsContainer, allNodesData) {
   const container = new PIXI.Container()
   container.x = nodeData.x
   container.y = nodeData.y
   container.nodeData = nodeData
+  const isNodeAvailable = (node) => {
+    if (node.uid === 0 || node.type === NodeType.START) return true
+    if (node.active) return true
+    const links = allNodesData.links
+    const hasActiveNeighbor = links.some(link => {
+      if (link.from === node.uid) {
+        const neighborNode = allNodesData.nodes.find(n => n.uid === link.to)
+        return neighborNode && neighborNode.active
+      }
+      if (link.to === node.uid) {
+        const neighborNode = allNodesData.nodes.find(n => n.uid === link.from)
+        return neighborNode && neighborNode.active
+      }
+      return false
+    })
+    return hasActiveNeighbor
+  }
   const colors = { main: 0xffaa44, glow: 0xffcc66, line: 0x885522 }
   let outerRadius, iconSize
   switch (nodeData.type) {
@@ -239,6 +257,10 @@ async function createNode(nodeData, nodesContainer, allEdges, app, tooltipsConta
       outerRadius = 35
       iconSize = 26
       break
+  }
+  if (nodeData.isFinal) {
+    outerRadius *= 1.5
+    iconSize *= 1.5
   }
   const outerGlow = new PIXI.Graphics()
   outerGlow.circle(0, 0, outerRadius + 12)
@@ -329,12 +351,11 @@ async function createNode(nodeData, nodesContainer, allEdges, app, tooltipsConta
   container.on("pointerover", () => {
     outerGlow.alpha = 1
     container.scale.set(1.15)
-    
     tooltip = new PIXI.Container()
     const tooltipBg = new PIXI.Graphics()
     const padding = 12
     const text = new PIXI.Text({
-      text: nodeData.name + (nodeData.value ? '\n' + nodeData.value : ''),
+      text: nodeData.name,
       style: {
         fontFamily: 'Arial',
         fontSize: 14,
@@ -345,7 +366,6 @@ async function createNode(nodeData, nodesContainer, allEdges, app, tooltipsConta
       },
       resolution: 2
     })
-    
     const tooltipWidth = text.width + padding * 2
     const tooltipHeight = text.height + padding * 2
     tooltipBg.rect(0, 0, tooltipWidth, tooltipHeight)
@@ -354,16 +374,12 @@ async function createNode(nodeData, nodesContainer, allEdges, app, tooltipsConta
     text.x = padding
     text.y = padding
     tooltip.addChild(tooltipBg, text)
-    
-    // Позиционируем tooltip относительно ноды в мировых координатах
     const globalPos = container.toGlobal(new PIXI.Point(0, 0))
     const localPos = tooltipsContainer.toLocal(globalPos)
     tooltip.x = localPos.x - tooltipWidth / 2
     tooltip.y = localPos.y - outerRadius - tooltipHeight - 10
-    
     tooltipsContainer.addChild(tooltip)
   })
-  
   container.on("pointerout", () => {
     outerGlow.alpha = nodeData.active ? 1 : 0
     container.scale.set(1.0)
@@ -373,8 +389,68 @@ async function createNode(nodeData, nodesContainer, allEdges, app, tooltipsConta
       tooltip = null
     }
   })
-  container.on("pointertap", () => {
-    nodeData.active = !nodeData.active
+  container.on("pointertap", async () => {
+    if (!isNodeAvailable(nodeData)) {
+      const shake = new PIXI.Graphics()
+      shake.circle(0, 0, outerRadius + 5)
+      shake.stroke({ width: 2, color: 0xff0000, alpha: 0.8 })
+      container.addChild(shake)
+      let shakeTime = 0
+      const shakeTicker = (delta) => {
+        shakeTime += delta.deltaTime
+        shake.alpha = 1 - (shakeTime / 20)
+        if (shakeTime >= 20) {
+          container.removeChild(shake)
+          app.ticker.remove(shakeTicker)
+        }
+      }
+      app.ticker.add(shakeTicker)
+      return
+    }
+    if (!nodeData.active && characterStore.character?.available_skill_points <= 0) {
+      const shake = new PIXI.Graphics()
+      shake.circle(0, 0, outerRadius + 5)
+      shake.stroke({ width: 2, color: 0xff6600, alpha: 0.8 })
+      container.addChild(shake)
+      let shakeTime = 0
+      const shakeTicker = (delta) => {
+        shakeTime += delta.deltaTime
+        shake.alpha = 1 - (shakeTime / 20)
+        if (shakeTime >= 20) {
+          container.removeChild(shake)
+          app.ticker.remove(shakeTicker)
+        }
+      }
+      app.ticker.add(shakeTicker)
+      return
+    }
+    const wasActive = nodeData.active
+    try {
+      if (wasActive) {
+        await characterStore.unallocateSkillPoint(nodeData.uid)
+      } else {
+        await characterStore.allocateSkillPoint(nodeData.uid)
+      }
+      await characterStore.fetchCharacter()
+      nodeData.active = !wasActive
+    } catch (error) {
+      console.error('Failed to toggle skill node:', error)
+      const shake = new PIXI.Graphics()
+      shake.circle(0, 0, outerRadius + 5)
+      shake.stroke({ width: 2, color: 0xff0000, alpha: 0.8 })
+      container.addChild(shake)
+      let shakeTime = 0
+      const shakeTicker = (delta) => {
+        shakeTime += delta.deltaTime
+        shake.alpha = 1 - (shakeTime / 20)
+        if (shakeTime >= 20) {
+          container.removeChild(shake)
+          app.ticker.remove(shakeTicker)
+        }
+      }
+      app.ticker.add(shakeTicker)
+      return
+    }
     innerGlow.clear()
     innerGlow.circle(0, 0, outerRadius - 3)
     innerGlow.fill({ color: nodeData.active ? colors.main : 0x1a1a1a, alpha: nodeData.active ? 0.3 : 0.5 })
@@ -468,7 +544,6 @@ async function createNode(nodeData, nodesContainer, allEdges, app, tooltipsConta
   return container
 }
 onMounted(async () => {
-  // Загружаем данные персонажа если их еще нет
   if (!characterStore.character) {
     try {
       await characterStore.fetchCharacter()
@@ -476,7 +551,20 @@ onMounted(async () => {
       console.error('Failed to fetch character data:', error)
     }
   }
-  
+  try {
+    const treeJsonPath = characterStore.character?.class?.tree_json
+    if (treeJsonPath) {
+      const treeUrl = `${BASE_URL}/${treeJsonPath}`
+      const response = await fetch(treeUrl)
+      nodesData.value = await response.json()
+    } else {
+      console.error('tree_json path not found in character data')
+      return
+    }
+  } catch (error) {
+    console.error('Failed to load skill tree data:', error)
+    return
+  }
   app = new PIXI.Application()
   await app.init({
     resizeTo: pixiContainer.value,
@@ -551,22 +639,36 @@ onMounted(async () => {
       viewport.y = mousePos.y - worldPos.y * viewport.scale.y
     }
   }, { passive: false })
-  const positions = getNodePositions(nodesData.nodes)
-  const enrichedNodes = nodesData.nodes.map(node => ({
-    ...node,
-    x: positions.get(node.uid)?.x || 0,
-    y: positions.get(node.uid)?.y || 0,
-    color: getNodeColor(node),
-    type: getNodeType(node),
-    active: node.uid === 0
-  }))
+  const positions = getNodePositions(nodesData.value.nodes)
+  const linkCounts = new Map()
+  nodesData.value.nodes.forEach(node => linkCounts.set(node.uid, 0))
+  nodesData.value.links.forEach(link => {
+    linkCounts.set(link.from, (linkCounts.get(link.from) || 0) + 1)
+    linkCounts.set(link.to, (linkCounts.get(link.to) || 0) + 1)
+  })
+  const enrichedNodes = nodesData.value.nodes.map(node => {
+    const allocatedNodes = characterStore.character?.allocated_nodes || []
+    const isAllocated = allocatedNodes.includes(node.uid)
+    return {
+      ...node,
+      x: positions.get(node.uid)?.x || 0,
+      y: positions.get(node.uid)?.y || 0,
+      color: getNodeColor(node),
+      type: getNodeType(node),
+      active: isAllocated || node.uid === 0,
+      isFinal: linkCounts.get(node.uid) === 1
+    }
+  })
   const nodeMap = new Map()
   const allEdges = []
   for (const node of enrichedNodes) {
-    const nodeContainer = await createNode(node, nodesContainer, allEdges, app, tooltipsContainer)
+    const nodeContainer = await createNode(node, nodesContainer, allEdges, app, tooltipsContainer, {
+      nodes: enrichedNodes,
+      links: nodesData.value.links
+    })
     nodeMap.set(node.uid, node)
   }
-  nodesData.links.forEach(link => {
+  nodesData.value.links.forEach(link => {
     const nodeA = nodeMap.get(link.from)
     const nodeB = nodeMap.get(link.to)
     if (nodeA && nodeB) {

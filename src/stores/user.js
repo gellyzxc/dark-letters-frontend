@@ -3,6 +3,7 @@ import apiClient from '@/api/client'
 export const useUserStore = defineStore('user', {
     state: () => ({
         user: null,
+        character: null,
         statistics: null,
         loading: false,
         error: null
@@ -79,6 +80,20 @@ export const useUserStore = defineStore('user', {
                 return response.data
             } catch (error) {
                 this.error = error.response?.data?.message || 'Failed to fetch statistics'
+                this.loading = false
+                throw error
+            }
+        },
+        async fetchCharacter() {
+            this.loading = true
+            this.error = null
+            try {
+                const response = await apiClient.get('/character/me')
+                this.character = response.data
+                this.loading = false
+                return response.data
+            } catch (error) {
+                this.error = error.response?.data?.message || 'Failed to fetch character'
                 this.loading = false
                 throw error
             }

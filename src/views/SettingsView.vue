@@ -18,7 +18,7 @@
               <span>User logo</span>
               <div class="user-avatar-wrapper" @click="showAvatarModal = true">
                 <div class="avatar-frame">
-                  <img :src="selectedAvatarImage" :alt="getSelectedAvatar().name" class="user-avatar-display" />
+                  <img :src="BASE_URL + userAvatar" class="user-avatar-display" />
                 </div>
               </div>
             </div>
@@ -35,15 +35,15 @@
             <div class="grid-label-small">For issues, bugs, or technical problems, please reach out to:</div>
             <div class="grid-value">DarkLettersBugReport@gmail.com</div>
           </div>
+          <button class="reset-button" @click="resetCharacter">Reset Progress</button>
           <modal-component :open="showAvatarModal" @willDismiss="showAvatarModal = false">
-            <frame-component style="height: 40svh !important;">
+            <frame-component style="height: 48svh !important;">
               <div class="avatar-modal-frame">
                 <div class="avatar-modal-content">
                   <div class="avatar-modal-title">Choose your avatar</div>
                   <div class="avatar-list">
-                    <div v-for="avatar in avatars" :key="'avatar-' + avatar.id" class="avatar-option"
-                      @click="selectAvatar(avatar.id)">
-                      <img :src="avatar.image" :alt="avatar.name" class="user-avatar-image" />
+                    <div v-for="avatar in avatars" :key="avatar" class="avatar-option" @click="selectAvatar(avatar)">
+                      <img :src="BASE_URL + 'static/avatar/' + avatar" class="user-avatar-image" />
                     </div>
                   </div>
                   <div class="avatar-modal-title" style="margin-top:1rem;">Choose your frame</div>
@@ -350,6 +350,7 @@
   color: $color-text-primary;
   font-size: $font-size-base;
   padding: 0;
+  position: relative;
 }
 
 .settings-grid {
@@ -440,6 +441,35 @@
 .grid-empty {
   grid-column: 2;
 }
+
+.reset-button {
+  position: absolute;
+  bottom: 2rem;
+  left: 8rem;
+  transform: translateX(-50%);
+  padding: $spacing-xs $spacing-lg;
+  background: transparent;
+  border: none;
+  border-radius: $radius-xs;
+  color: #ef4444;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  font-family: $font-family-primary;
+  cursor: pointer;
+  transition: all $transition-base;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  &:hover {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.25) 0%, rgba(220, 38, 38, 0.35) 100%);
+    transform: translateX(-50%) translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  }
+
+  &:active {
+    transform: translateX(-50%) translateY(0) scale(0.98);
+  }
+}
 </style>
 <script>
 import { computed, onMounted, ref } from 'vue'
@@ -465,13 +495,14 @@ export default {
     const showAvatarModal = ref(false)
     const currentDate = ref('')
     const avatars = [
-      { id: 1, name: 'assasin', image: assasinAvatar, apiPath: 'static/avatar/1.png' },
-      { id: 2, name: 'dwarf', image: dwarfAvatar, apiPath: 'static/avatar/2.png' },
-      { id: 3, name: 'elf', image: elfAvatar, apiPath: 'static/avatar/3.png' },
-      { id: 4, name: 'gnom', image: gnomAvatar, apiPath: 'static/avatar/4.png' },
-      { id: 5, name: 'human', image: humanAvatar, apiPath: 'static/avatar/5.png' },
-      { id: 6, name: 'mage', image: mageAvatar, apiPath: 'static/avatar/6.png' },
-      { id: 7, name: 'warrior', image: warriorAvatar, apiPath: 'static/avatar/7.png' }
+      '1.png',
+      '2.png',
+      '3.png',
+      '4.png',
+      '5.png',
+      '7.png',
+      '8.png',
+      '9.png',
     ]
     const userEmail = computed(() => userStore.user?.email || 'user@typing.com')
     const userLogin = computed(() => userStore.user?.login || 'user')
@@ -483,36 +514,23 @@ export default {
       if (!photoPath) return null
       return `${BASE_URL}${photoPath}`
     }
-    const getSelectedAvatar = () => {
-      const currentAvatarPath = userStore.user?.avatar
-      if (!currentAvatarPath) return avatars[0]
-      const foundAvatar = avatars.find(a => currentAvatarPath.includes(a.apiPath) || currentAvatarPath.includes(`${a.id}.png`))
-      return foundAvatar || avatars[0]
-    }
-    const selectedAvatarImage = computed(() => {
-      const avatar = getSelectedAvatar()
-      return avatar ? avatar.image : avatars[0].image
-    })
-    const selectAvatar = async (id) => {
+    const selectAvatar = async (img) => {
       if (!userStore.user) return
       try {
-        const avatar = avatars.find(a => a.id === id)
-        if (avatar) {
-          await userStore.updateUser({
-            avatar: avatar.apiPath,
-          })
-          await userStore.fetchCurrentUser()
-        }
+        await userStore.updateUser({
+          avatar: 'static/avatar/' + img,
+        })
+        await userStore.fetchCurrentUser()
         showAvatarModal.value = false
       } catch (error) {
         console.error('Failed to update avatar:', error)
       }
     }
-    const selectFrame = async (n) => {
+    const selectFrame = async (id) => {
       if (!userStore.user) return
       try {
         await userStore.updateUser({
-          frame: `static/frame/${n}.png`,
+          frame: `static/frame/${id}.png`,
         })
         showAvatarModal.value = false
       } catch (error) {
@@ -540,6 +558,23 @@ export default {
         }
       }
     }
+    const resetCharacter = async () => {
+      if (confirm('Are you sure you want to reset your character? This action cannot be undone.')) {
+        try {
+          const characterId = characterStore.character?.id
+          if (!characterId) {
+            console.error('No character found')
+            return
+          }
+          await characterStore.deleteCharacter(characterId)
+          console.log('Character deleted successfully')
+          window.location.href = '/character-select'
+        } catch (error) {
+          console.error('Failed to delete character:', error)
+          alert('Failed to reset character. Please try again.')
+        }
+      }
+    }
     onMounted(async () => {
       updateDate()
       setInterval(updateDate, 60000)
@@ -550,7 +585,16 @@ export default {
           console.error('Failed to fetch user data:', error)
         }
       }
+      if (!characterStore.character) {
+        try {
+          await characterStore.fetchCharacter()
+        } catch (error) {
+          console.error('Failed to fetch character data:', error)
+        }
+      }
     })
+    const API_BASE_URL = 'http://147.45.253.24:5035/';
+    const BASE_URL = API_BASE_URL.replace('/api/v1', '');
     return {
       showAvatarModal,
       currentDate,
@@ -561,12 +605,12 @@ export default {
       userFrame,
       userNotification,
       characterGold,
-      getSelectedAvatar,
-      selectedAvatarImage,
       selectAvatar,
       selectFrame,
       resetProgress,
-      getImageUrl
+      resetCharacter,
+      getImageUrl,
+      BASE_URL
     }
   }
 }

@@ -4,7 +4,7 @@
 const ITEM_SIZES = {
   amulet: [1, 1],
   belt: [2, 2],
-  blade: [1, 2],
+  blades: [1, 2],
   blade_and_shield: [2, 2],
   chest: [2, 2],
   cloak: [2, 2],

@@ -9,8 +9,8 @@
       <div class="clock">
         <frame-component type="game-timer">
           <div class="clock-in">
-            <span style="color: #7B7B7B">
-              20:00
+            <span :style="{ color: timeRemaining < 60 ? '#ff4444' : '#7B7B7B' }">
+              {{ formattedTime }}
             </span>
           </div>
         </frame-component>
@@ -86,14 +86,68 @@
             </div>
           </frame-component>
         </div>
-        <img class="char" :class="{ 'damaged': isDamaged }" src="@/assets/images/game-characters/mage.png" />
+        <img class="char" :class="{ 'damaged': isDamaged }" :src="monsterImageUrl" />
       </div>
     </div>
   </div>
   <modal-component :open="exited" @will-dismiss="handleBack">
-    <frame-component style="height: 400px">
-      <div style="height: 100%; width: 100%; background: black">
-        <span>stats</span>
+    <frame-component style="width: 50svw !important; overflow: hidden;">
+      <div class="stats-modal">
+        <div class="stats-header">Statistic</div>
+        <div class="stats-datetime">
+          <span>{{ formattedDate }}</span>
+        </div>
+        <div class="stats-section">
+          <div class="section-title">Session info</div>
+          <div class="stats-row">
+            <span class="label">Word</span>
+            <span class="value">{{ Math.floor(typedText.length / 5) }}</span>
+          </div>
+          <div class="stats-row">
+            <span class="label">Error</span>
+            <span class="value">{{ totalWordErrors + errors }}</span>
+          </div>
+          <div class="stats-row">
+            <span class="label">Accuracy</span>
+            <span class="value">{{ textsCompleted > 0 ? Math.round(totalAccuracy / textsCompleted) : accuracy }}%</span>
+          </div>
+          <div class="stats-row">
+            <span class="label">WPM</span>
+            <span class="value">{{ textsCompleted > 0 ? Math.round(totalWpm / textsCompleted) : wpm }}</span>
+          </div>
+          <div class="stats-row">
+            <span class="label">WPS</span>
+            <span class="value">{{ ((textsCompleted > 0 ? totalWpm / textsCompleted : wpm) / 60).toFixed(1) }}</span>
+          </div>
+        </div>
+        <div class="stats-section">
+          <div class="section-title">Session reward</div>
+          <div class="stats-row">
+            <span class="label">Exp</span>
+            <span class="value">{{ gameResult?.exp_gained || 0 }}</span>
+          </div>
+          <div class="stats-row">
+            <span class="label">gold</span>
+            <span class="value">{{ gameResult?.gold_gained || 0 }}</span>
+          </div>
+        </div>
+        <div class="stats-section">
+          <div class="section-title">Kills info</div>
+          <div class="stats-row">
+            <span class="label">Monsters kill</span>
+            <span class="value">{{ monstersDefeated.length }}</span>
+          </div>
+          <div class="stats-row">
+            <span class="label">Total damage</span>
+            <span class="value">{{ totalDamageDealt }}</span>
+          </div>
+          <div class="stats-row">
+            <span class="label">Total damage taken</span>
+            <span class="value">{{ Math.round(totalDamageTaken) }}</span>
+          </div>
+        </div>
+        <div class="stats-footer">
+        </div>
       </div>
     </frame-component>
   </modal-component>
@@ -502,12 +556,33 @@
 .skills-deck {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   gap: $spacing-sm;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
   padding: $spacing-sm;
+  overflow-y: auto;
+  max-height: 100%;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba($color-gold-primary, 0.3);
+    border-radius: 3px;
+
+    &:hover {
+      background: rgba($color-gold-primary, 0.5);
+    }
+  }
 
   .skill-card {
     width: 2rem;
@@ -565,6 +640,93 @@
     }
   }
 }
+
+.stats-modal {
+  background: $color-bg-base;
+  padding: $spacing-sm $spacing-sm 1rem $spacing-sm;
+  width: calc(100% - 2 * $spacing-sm) !important;
+  display: flex;
+  gap: $spacing-sm;
+  flex-direction: column;
+  color: $color-text-primary;
+
+  .stats-header {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-normal;
+    color: $color-text-primary;
+    text-align: left;
+    font-family: $font-family-primary;
+  }
+
+  .stats-datetime {
+    font-size: $font-size-sm;
+    color: $color-text-disabled;
+    text-align: right;
+    white-space: pre-line;
+    font-family: $font-family-primary;
+    margin-bottom: $spacing-sm;
+  }
+
+  .stats-section {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+
+    .section-title {
+      font-size: $font-size-base;
+      color: $color-text-primary;
+      font-family: $font-family-primary;
+      margin-bottom: $spacing-xs;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      padding: $spacing-xs 0;
+      font-family: $font-family-primary;
+
+      .label {
+        font-size: $font-size-sm;
+        color: $color-text-disabled;
+      }
+
+      .value {
+        font-size: $font-size-sm;
+        color: $color-text-primary;
+        text-align: right;
+      }
+    }
+  }
+
+  .stats-footer {
+    display: flex;
+    justify-content: center;
+    padding-top: $spacing-lg;
+    margin-top: auto;
+
+    .back-button {
+      padding: $spacing-sm $spacing-lg;
+      font-size: $font-size-base;
+      color: $color-text-primary;
+      font-weight: $font-weight-normal;
+      background: transparent;
+      border: 1px solid $color-text-disabled;
+      border-radius: $radius-sm;
+      cursor: pointer;
+      transition: all $transition-base;
+      font-family: $font-family-primary;
+
+      &:hover {
+        border-color: $color-text-primary;
+        background: rgba($color-text-primary, 0.1);
+      }
+
+      &:active {
+        transform: translateY(1px);
+      }
+    }
+  }
+}
 </style>
 <script>
 import { useCharacterStore } from '@/stores/character'
@@ -605,6 +767,8 @@ import skill31 from '@/assets/images/skillsicons/ (31).png'
 import skill32 from '@/assets/images/skillsicons/ (32).png'
 import skill33 from '@/assets/images/skillsicons/ (33).png'
 import skill34 from '@/assets/images/skillsicons/ (34).png'
+const API_BASE_URL = 'http://147.45.253.24:5035/';
+const BASE_URL = API_BASE_URL.replace('/api/v1', '');
 const skillIcons = {
   1: skill1, 2: skill2, 3: skill3, 4: skill4, 5: skill5,
   6: skill6, 7: skill7, 8: skill8, 9: skill9, 10: skill10,
@@ -620,6 +784,9 @@ export default {
   data() {
     return {
       gameTypeId: null,
+      gameTime: 0,
+      timeRemaining: 0,
+      timerInterval: null,
       allTexts: [],
       currentTextIndex: 0,
       currentText: "",
@@ -652,6 +819,8 @@ export default {
       playerMaxMana: 100,
       monsterHp: 160,
       monsterMaxHp: 160,
+      monsterLevel: 10,
+      monsterPhoto: null,
       monsterStats: {
         damage: 23.81,
         error_attack: 0.0652,
@@ -664,6 +833,9 @@ export default {
       totalAccuracy: 0,
       textsCompleted: 0,
       totalWordErrors: 0,
+      totalDamageDealt: 0,
+      totalDamageTaken: 0,
+      gameResult: null,
       activeSkills: [1, 2, 3],
       skillQueue: [],
       skillCooldowns: {},
@@ -733,6 +905,9 @@ export default {
   },
   async mounted() {
     this.gameTypeId = this.$route.params.id
+    this.gameTime = parseInt(this.$route.query.time) || 20
+    this.timeRemaining = this.gameTime * 60
+    this.startTimer()
     this.sessionStartTime = Date.now()
     if (!this.characterStore.character) {
       try {
@@ -763,7 +938,8 @@ export default {
         const texts = await this.gameStore.fetchTextsForGameType(this.gameTypeId)
         this.allTexts = texts
         if (texts && texts.length > 0) {
-          await this.loadText(0)
+          const randomIndex = Math.floor(Math.random() * texts.length)
+          await this.loadText(randomIndex)
         }
       } catch (error) {
         console.error('Failed to fetch game texts:', error)
@@ -774,30 +950,52 @@ export default {
   },
   beforeUnmount() {
     window.removeEventListener('keydown', this.handleKeyPress)
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval)
+    }
+  },
+  computed: {
+    formattedTime() {
+      const minutes = Math.floor(this.timeRemaining / 60)
+      const seconds = this.timeRemaining % 60
+      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+    },
+    formattedDate() {
+      const now = new Date()
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+      const day = String(now.getDate()).padStart(2, '0')
+      const month = String(now.getMonth() + 1).padStart(2, '0')
+      const year = now.getFullYear()
+      const dayName = days[now.getDay()]
+      const hours = String(now.getHours()).padStart(2, '0')
+      const minutes = String(now.getMinutes()).padStart(2, '0')
+      const seconds = String(now.getSeconds()).padStart(2, '0')
+      return `${day}.${month}.${year} - ${dayName} ${hours}:${minutes} ${hours}:${minutes}:${seconds}`
+    },
+    monsterImageUrl() {
+      return `${BASE_URL}/${this.monsterPhoto}`
+    }
   },
   methods: {
+    startTimer() {
+      this.timerInterval = setInterval(() => {
+        if (!this.paused && this.timeRemaining > 0) {
+          this.timeRemaining--
+          if (this.timeRemaining === 0) {
+            this.submitGameResults()
+          }
+        }
+      }, 1000)
+    },
     async loadText(index) {
-      if (index >= this.allTexts.length) {
+      if (index >= this.allTexts.length || index < 0) {
         await this.submitGameResults()
         return
       }
       this.currentTextIndex = index
       this.currentText = this.allTexts[index].value || ''
       this.words = this.currentText.split(/\s+/).filter(w => w.length > 0)
-      try {
-        const monster = await this.gameStore.generateMonster(this.gameTypeId)
-        this.monsterStats = {
-          damage: monster.damage || 20,
-          error_attack: monster.error_attack || 0.05,
-          hp: monster.hp || 100,
-          random_attack: monster.random_attack || 0.03,
-          wpm_drop_attack: monster.wpm_drop_attack || 0.15
-        }
-        this.monsterMaxHp = monster.hp || 100
-        this.monsterHp = this.monsterMaxHp
-      } catch (error) {
-        console.error('Failed to load monster:', error)
-      }
+      await this.spawnMonster()
       this.typedText = ''
       this.currentWordIndex = 0
       this.combo = 0
@@ -807,18 +1005,40 @@ export default {
       this.startTime = null
       this.calculateCharWidth()
     },
-    async submitGameResults() {
-      const sessionTime = (Date.now() - this.sessionStartTime) / 1000
-      const avgWpm = this.textsCompleted > 0 ? this.totalWpm / this.textsCompleted : 0
-      const avgAccuracy = this.textsCompleted > 0 ? this.totalAccuracy / this.textsCompleted : 0
+    async spawnMonster() {
       try {
-        await this.gameStore.saveGameResult({
+        const monster = await this.gameStore.generateMonster(this.monsterLevel)
+        this.monsterStats = {
+          damage: monster.damage || 20,
+          error_attack: monster.error_attack || 0.05,
+          hp: monster.hp || 100,
+          random_attack: monster.random_attack || 0.03,
+          wpm_drop_attack: monster.wpm_drop_attack || 0.15
+        }
+        this.monsterMaxHp = monster.hp || 100
+        this.monsterHp = this.monsterMaxHp
+        this.monsterPhoto = monster.photo || null
+        this.actionLog.push(`Monster level ${this.monsterLevel} spawned!`)
+      } catch (error) {
+        console.error('Failed to spawn monster:', error)
+      }
+    },
+    async submitGameResults() {
+      if (this.timerInterval) {
+        clearInterval(this.timerInterval)
+      }
+      const sessionTime = (Date.now() - this.sessionStartTime) / 1000
+      const avgWpm = this.textsCompleted > 0 ? this.totalWpm / this.textsCompleted : this.wpm
+      const avgAccuracy = this.textsCompleted > 0 ? this.totalAccuracy / this.textsCompleted : this.accuracy
+      try {
+        const result = await this.gameStore.saveGameResult({
           sessionTime: sessionTime,
           avgWpm: avgWpm,
           avgAccuracy: avgAccuracy,
-          wordError: this.totalWordErrors,
+          wordError: this.totalWordErrors + this.errors,
           monstersDefeated: this.monstersDefeated
         })
+        this.gameResult = result
         this.exited = true
       } catch (error) {
         console.error('Failed to submit game results:', error)
@@ -886,14 +1106,8 @@ export default {
           this.totalWordErrors += this.errors
           setTimeout(async () => {
             if (this.monsterHp <= 0) {
-              if (this.allTexts[this.currentTextIndex]) {
-                this.monstersDefeated.push(this.allTexts[this.currentTextIndex].id)
-              }
-              if (this.monstersDefeated.length >= this.allTexts.length) {
-                await this.submitGameResults()
-              } else {
-                await this.loadText(this.currentTextIndex + 1)
-              }
+              this.monsterLevel++
+              await this.submitGameResults()
             } else {
               await this.submitGameResults()
             }
@@ -1137,11 +1351,19 @@ export default {
       return Math.round(damage)
     },
     dealDamageToMonster() {
-      const damage = this.calculateDamage() / 10
+      const damage = this.calculateDamage()
       this.monsterHp = Math.max(0, this.monsterHp - damage)
+      this.totalDamageDealt += damage
       this.actionLog.push(`Dealt ${damage} damage to monster!`)
       if (this.monsterHp <= 0) {
+        this.monstersDefeated.push(this.monsterLevel)
         this.actionLog.push(`Monster defeated!`)
+        if (this.typedText.length < this.currentText.length) {
+          this.monsterLevel++
+          setTimeout(async () => {
+            await this.spawnMonster()
+          }, 500)
+        }
       }
     },
     takeMonsterDamage() {
@@ -1167,9 +1389,13 @@ export default {
       damage *= this.temporaryEffects.defenseMultiplier
       damage = Math.max(1, damage - this.baseStats.defense - this.temporaryEffects.defenseBonus)
       this.playerHp = Math.max(0, this.playerHp - damage)
+      this.totalDamageTaken += damage
       this.actionLog.push(`Took ${damage.toFixed(1)} damage!`)
       if (this.playerHp <= 0) {
         this.actionLog.push(`You were defeated!`)
+        setTimeout(async () => {
+          await this.submitGameResults()
+        }, 1000)
       }
     },
     restoreMana(amount) {

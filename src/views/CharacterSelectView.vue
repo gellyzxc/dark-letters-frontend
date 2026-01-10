@@ -342,6 +342,7 @@
 }
 
 .confirm-content {
+  background-color: black;
   height: calc(100% - 20px) !important;
   width: calc(100% - 20px) !important;
   padding: 10px;
@@ -399,6 +400,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import FrameComponent from '@/components/game/FrameComponent.vue';
 import ModalComponent from '@/components/ModalComponent.vue';
+import { useStaticStore } from '@/stores/static';
 import mageImage from '@/assets/images/game-characters/mage.png';
 export default {
   name: 'CharacterSelectView',
@@ -420,63 +422,29 @@ export default {
       isZooming: false,
       mageImage: mageImage,
       swiperInstance: null,
-      currentSlideIndex: 0,
-      races: [
-        {
-          agility: 10,
-          description: 'Универсальная раса с балансированными характеристиками. Люди быстро адаптируются к любым условиям и могут освоить любой класс.',
-          icon: null,
-          id: 1,
-          intellect: 10,
-          name: 'Человек',
-          strength: 10
-        },
-        {
-          agility: 15,
-          description: 'Грациозная раса с исключительной ловкостью. Эльфы обладают природной связью с магией и превосходной меткостью.',
-          icon: null,
-          id: 2,
-          intellect: 10,
-          name: 'Эльф',
-          strength: 5
-        },
-        {
-          agility: 5,
-          description: 'Крепкая и выносливая раса горных жителей. Дварфы известны своей невероятной силой и мастерством в кузнечном деле.',
-          icon: null,
-          id: 3,
-          intellect: 5,
-          name: 'Дварф',
-          strength: 20
-        },
-        {
-          agility: 5,
-          description: 'Маленькая, но невероятно умная раса изобретателей. Гномы компенсируют физическую слабость выдающимся интеллектом.',
-          icon: null,
-          id: 4,
-          intellect: 20,
-          name: 'Гном',
-          strength: 5
-        }
-      ],
-      characters: [
-        {
-          name: 'Mage',
-          image: mageImage,
-          description: 'A powerful spellcaster who harnesses the arcane forces of magic. Masters fireballs, healing spells, and illusions to control the battlefield from afar.',
-        },
-        {
-          name: 'Warrior',
-          image: mageImage,
-          description: 'A sturdy frontline fighter equipped with heavy armor and weapons. Excels in close combat, tanking damage and delivering devastating blows to enemies.',
-        },
-        {
-          name: 'Archer',
-          image: mageImage,
-          description: 'A skilled ranged attacker with exceptional precision and agility. Uses bows and arrows to strike from distance, providing support and crowd control.',
-        },
-      ],
+      currentSlideIndex: 0
     };
+  },
+  computed: {
+    races() {
+      return this.staticStore.races || [];
+    },
+    characters() {
+      return (this.staticStore.classes || []).map(cls => ({
+        id: cls.id,
+        name: cls.name,
+        description: cls.description,
+        image: mageImage,
+        tree_json: cls.tree_json
+      }));
+    }
+  },
+  async mounted() {
+    await this.staticStore.fetchAll();
+  },
+  setup() {
+    const staticStore = useStaticStore();
+    return { staticStore };
   },
   methods: {
     onSwiperInit(swiper) {
@@ -513,15 +481,27 @@ export default {
       this.selectedCharacter = character;
       this.showConfirmModal = true;
     },
-    confirmSelection() {
+    async confirmSelection() {
       this.showConfirmModal = false;
       this.isZooming = true;
       console.log('Selected Race:', this.selectedRace);
       console.log('Selected Class:', this.selectedCharacter);
+      await this.createCharacter();
       setTimeout(() => {
-        this.$router.push('/play');
+        this.$router.push('/news');
       }, 500);
     },
+    async createCharacter() {
+      try {
+        const { useCharacterStore } = await import('@/stores/character');
+        const characterStore = useCharacterStore();
+        const result = await characterStore.createCharacter(this.selectedCharacter.id, this.selectedRace.id);
+        console.log('Character created successfully:', result);
+      } catch (error) {
+        console.error('Failed to create character:', error);
+        alert('Failed to create character. Please try again.');
+      }
+    }
   },
 };
 </script>
