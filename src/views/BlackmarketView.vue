@@ -16,60 +16,33 @@
     </div>
   </div>
   <modal-component :open="showPreviewModal" @will-dismiss="showPreviewModal = false">
-    <frame-component class="item-frame" style="max-width: 60svw !important;">
+    <frame-component type="generic-big-squared-rounded" class="item-frame" style="max-width: 35svw !important;">
       <div class="crate-info-card" v-if="selectedCrate">
-        <div class="glow" :class="`glow-${currentCrateType}`"></div>
         <div class="crate-header">
-          <div class="crate-name">{{ selectedCrate.name }}</div>
-          <div class="crate-description">{{ selectedCrate.description }}</div>
-          <div class="items-count">{{ selectedCrate.drop_probabilities.items_count.min }}-{{
-            selectedCrate.drop_probabilities.items_count.max }} предметов</div>
+          <div class="crate-name">{{ selectedCrate.name }} <span style="color: #7B7B7B">{{ selectedCrate.description
+              }}</span></div>
+          <div class="crate-description"></div>
+          <div class="items-count">Items count {{ selectedCrate.drop_probabilities.items_count.min }}-{{
+            selectedCrate.drop_probabilities.items_count.max }}</div>
         </div>
         <div class="probabilities-section">
-          <div class="probability-category">
-            <div class="category-header">
-              <span class="category-name">Золото</span>
-              <span class="category-chance">{{ selectedCrate.drop_probabilities.drops.gold.chance }}%</span>
+          <div class="section-title">Avaliable drops</div>
+          <div class="drop-list">
+            <div class="drop-item" v-if="selectedCrate.drop_probabilities.drops.artifacts.length > 0">
+              <span class="drop-name">+ artifacts {{
+                getTotalArtifactChance(selectedCrate.drop_probabilities.drops.artifacts) }}%</span>
             </div>
-            <div class="category-details">
-              {{ selectedCrate.drop_probabilities.drops.gold.min }} - {{ selectedCrate.drop_probabilities.drops.gold.max
-              }} золота
+            <div class="drop-item">
+              <span class="drop-name">+ gold {{ selectedCrate.drop_probabilities.drops.gold.chance }}%</span>
             </div>
-          </div>
-          <div class="probability-category" v-if="selectedCrate.drop_probabilities.drops.artifacts.length > 0">
-            <div class="category-header">
-              <span class="category-name">Артефакты</span>
-              <span class="category-chance">{{ getTotalArtifactChance(selectedCrate.drop_probabilities.drops.artifacts)
-              }}%</span>
-            </div>
-            <div class="category-details">
-              <div class="detail-item" v-for="artifact in selectedCrate.drop_probabilities.drops.artifacts.slice(0, 4)"
-                :key="artifact.id">
-                <span>Артефакт #{{ artifact.id }}</span>
-                <span class="detail-value">{{ artifact.chance }}%</span>
-              </div>
-              <div class="detail-more" v-if="selectedCrate.drop_probabilities.drops.artifacts.length > 4">
-                +{{ selectedCrate.drop_probabilities.drops.artifacts.length - 4 }} больше
-              </div>
-            </div>
-          </div>
-          <div class="probability-category">
-            <div class="category-header">
-              <span class="category-name">Предметы</span>
-              <span class="category-chance">{{ getTotalItemsChance(selectedCrate.drop_probabilities.drops.items)
-              }}%</span>
-            </div>
-            <div class="category-details">
-              <div class="detail-item" v-for="(itemType, typeName) in selectedCrate.drop_probabilities.drops.items"
-                :key="typeName">
-                <span>{{ getItemTypeName(typeName) }}</span>
-                <span class="detail-value">{{ itemType.total_chance }}%</span>
-              </div>
+            <div class="drop-item" v-for="(itemType, typeName) in selectedCrate.drop_probabilities.drops.items"
+              :key="typeName">
+              <span class="drop-name">+ {{ typeName }} {{ itemType.total_chance }}%</span>
             </div>
           </div>
         </div>
         <div class="item-price-block" @click="purchaseItem">
-          <span class="item-price">Открыть за {{ selectedCrate.price }} gold</span>
+          <span class="item-price">{{ selectedCrate.price }} gold</span>
         </div>
       </div>
     </frame-component>
@@ -79,28 +52,9 @@
       <div class="particles">
         <div v-for="i in 20" :key="i" class="particle" :style="getParticleStyle(i)"></div>
       </div>
-      <frame-component class="item-frame">
-        <div class="item-card reward-item-card" v-if="selectedItem">
-          <div class="glow" :class="`glow-${selectedItem.rarity}`"></div>
-          <div class="item-icon">
-            <img v-if="selectedItem.photo" :src="getImageUrl(selectedItem.photo)" :alt="selectedItem.name" />
-            <span v-else>{{ selectedItem.icon || '📦' }}</span>
-          </div>
-          <div class="item-content-flex">
-            <div class="item-left">
-              <div class="item-name">{{ selectedItem.name }}</div>
-              <div class="item-description">{{ selectedItem.description || 'No description.' }}</div>
-            </div>
-            <div class="item-right">
-              <div class="item-bonuses">
-                <div v-for="stat in selectedItem.stats" :key="stat.label" class="bonus-line">
-                  <span class="bonus-label">{{ stat.label }}</span>
-                  <span class="bonus-value">{{ stat.value }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <frame-component type="generic-card-horizontal" class="item-frame">
+        <item-info-card v-if="selectedItem" :item="selectedItem" variant="tooltip" :show-icon="true"
+          :show-glow="true" />
       </frame-component>
     </div>
   </modal-component>
@@ -158,157 +112,84 @@
 }
 
 .crate-info-card {
+  background-color: black;
   position: relative;
   background: $color-bg-modal;
-  padding: $spacing-md;
-  height: calc(100% - #{$spacing-xl}) !important;
-  width: calc(100% - #{$spacing-xl}) !important;
+  padding: calc($spacing-lg + 0.5rem);
+  height: calc(100% - 2 * calc($spacing-lg + 0.5rem)) !important;
+  width: calc(100% - 2 * calc($spacing-lg + 0.5rem)) !important;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: $spacing-lg;
-  font-family: $font-family-primary;
   color: $color-text-primary;
-
-  .glow {
-    position: absolute;
-    top: -20px;
-    left: -20px;
-    right: -20px;
-    bottom: -20px;
-    border-radius: $radius-lg;
-    opacity: 0.3;
-    filter: blur(20px);
-    z-index: -1;
-  }
 
   .crate-header {
     display: flex;
     flex-direction: column;
     gap: $spacing-sm;
-    padding-bottom: $spacing-md;
-    border-bottom: 1px solid rgba($color-gold-primary, 0.2);
+    width: 50%;
 
     .crate-name {
       font-size: $font-size-2xl;
-      font-weight: $font-weight-bold;
-      color: $color-gold-primary;
+      color: white;
       font-family: $font-family-primary;
-    }
-
-    .crate-description {
-      font-family: $font-family-primary;
-      font-size: $font-size-sm;
-      color: $color-text-secondary;
-      line-height: $line-height-normal;
     }
 
     .items-count {
+      position: absolute;
+      bottom: 2rem;
+      left: 2rem;
+      font-size: $font-size-2xl;
       font-family: $font-family-primary;
-      font-size: $font-size-sm;
-      color: $color-text-disabled;
-      font-weight: $font-weight-semibold;
       margin-top: $spacing-xs;
     }
   }
 
   .probabilities-section {
+    align-items: flex-end;
     display: flex;
     flex-direction: column;
-    gap: $spacing-md;
+    gap: $spacing-sm;
+    width: 50%;
 
-    .probability-category {
+    .section-title {
+      font-size: $font-size-2xl;
+      color: white;
+      font-family: $font-family-primary;
+      margin-bottom: $spacing-sm;
+    }
+
+    .drop-list {
       display: flex;
       flex-direction: column;
-      gap: $spacing-sm;
-      background: rgba($color-brown-dark, 0.3);
-      padding: $spacing-sm;
-      border-radius: $radius-sm;
-      border: 1px solid rgba($color-gold-primary, 0.15);
-      transition: border-color $transition-base, background $transition-base;
+      gap: 0.25rem;
 
-      &:hover {
-        border-color: rgba($color-gold-primary, 0.3);
-        background: rgba($color-brown-dark, 0.4);
-      }
-
-      .category-header {
+      .drop-item {
+        height: min-content;
         display: flex;
-        align-items: center;
-        gap: $spacing-sm;
-        padding-bottom: $spacing-xs;
-        border-bottom: 1px solid rgba($color-gold-primary, 0.1);
+        flex-direction: row;
+        justify-content: flex-end;
 
-        .category-icon {
-          font-size: $font-size-lg;
-        }
-
-        .category-name {
-          flex: 1;
-          font-size: $font-size-lg;
-          font-weight: $font-weight-semibold;
-          color: $color-gold-primary;
+        .drop-name {
+          text-align: right;
+          font-size: $font-size-2xl;
+          color: #7B7B7B;
           font-family: $font-family-primary;
-        }
-
-        .category-chance {
-          font-size: $font-size-base;
-          font-weight: $font-weight-bold;
-          color: $color-gold-primary;
-        }
-      }
-
-      .category-details {
-        display: flex;
-        flex-direction: column;
-        gap: $spacing-xs;
-        font-size: $font-size-sm;
-        font-family: $font-family-primary;
-        color: $color-text-secondary;
-        padding-left: $spacing-xs;
-
-        .detail-item {
-          display: flex;
-          justify-content: space-between;
-          padding: $spacing-xs 0;
-          transition: color $transition-fast;
-
-          &:hover {
-            color: $color-text-primary;
-          }
-
-          .detail-value {
-            font-family: $font-family-primary;
-            color: $color-text-primary;
-            font-weight: $font-weight-semibold;
-          }
-        }
-
-        .detail-more {
-          font-family: $font-family-primary;
-          color: $color-text-disabled;
-          font-style: italic;
-          font-size: $font-size-xs;
-          margin-top: $spacing-xs;
         }
       }
     }
   }
 
   .item-price-block {
-    font-family: $font-family-primary;
-    margin-top: $spacing-sm;
+    position: absolute;
+    right: 2rem;
+    bottom: 2rem;
+    color: white;
     cursor: pointer;
     transition: all $transition-base;
-    padding: $spacing-sm;
-    border-radius: $radius-sm;
-    background: rgba($color-gold-primary, 0.15);
-    text-align: center;
-    border: 1px solid rgba($color-gold-primary, 0.3);
 
     &:hover {
-      background: rgba($color-gold-primary, 0.25);
-      border-color: rgba($color-gold-primary, 0.5);
-      box-shadow: $glow-gold-sm;
+      transform: scale(1.02);
     }
 
     &:active {
@@ -316,9 +197,7 @@
     }
 
     .item-price {
-      font-size: $font-size-lg;
-      color: $color-gold-primary;
-      font-weight: $font-weight-bold;
+      font-size: $font-size-2xl;
       font-family: $font-family-primary;
     }
   }
@@ -488,119 +367,6 @@
   }
 }
 
-.reward-item-card {
-  position: relative;
-  width: 600px;
-  height: 100%;
-  background: $color-bg-overlay;
-  border-radius: $radius-xl;
-  box-shadow: $shadow-lg, 0 0 0 2px $color-brown-medium, 0 0 0 8px rgba($color-gold-primary, 0.08);
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  font-family: $font-family-primary;
-  color: $color-text-primary;
-
-  .glow {
-    position: absolute;
-    top: -20px;
-    left: -20px;
-    right: -20px;
-    bottom: -20px;
-    border-radius: $radius-lg;
-    opacity: 0.4;
-    filter: blur(25px);
-    z-index: -1;
-    animation: medievalGlow 2s ease-in-out infinite;
-  }
-
-  .item-icon {
-    font-size: 8rem;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    animation: iconBounce 1s ease-out;
-    filter: drop-shadow(0 4px 12px rgba($color-gold-primary, 0.5));
-
-    img {
-      width: 150px;
-      height: 150px;
-      object-fit: contain;
-    }
-  }
-
-  .item-content-flex {
-    display: flex;
-    flex-direction: row;
-    padding: 1rem;
-    width: calc(100% - 2rem);
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 2.5rem;
-    position: relative;
-  }
-
-  .item-left {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-
-    .item-name {
-      font-size: 2rem;
-      font-weight: 600;
-      color: $color-text-primary;
-      margin-bottom: 0.5rem;
-      letter-spacing: 0.01em;
-      line-height: 1.2;
-      text-shadow: $shadow-md, $glow-gold-sm;
-    }
-
-    .item-description {
-      font-size: 1.1rem;
-      color: $color-text-secondary;
-      line-height: 1.5;
-      word-break: break-word;
-      text-shadow: $shadow-sm;
-    }
-  }
-
-  .item-right {
-    flex: 1.2;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 1.2rem;
-
-    .item-bonuses {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 0.5rem;
-
-      .bonus-line {
-        font-size: 1.1rem;
-        color: $color-text-primary;
-        display: flex;
-        gap: 0.5em;
-        justify-content: flex-end;
-
-        .bonus-label {
-          color: $color-text-secondary;
-          min-width: 90px;
-          text-align: right;
-        }
-
-        .bonus-value {
-          color: $color-text-primary;
-          font-weight: 600;
-        }
-      }
-    }
-  }
-}
-
 .glow-legendary {
   background: radial-gradient(circle, rgba($color-gold-primary, 0.6) 0%, rgba($color-gold-dark, 0) 70%);
 }
@@ -703,13 +469,14 @@
 <script>
 import FrameComponent from "@/components/game/FrameComponent.vue";
 import ModalComponent from "@/components/ModalComponent.vue";
+import ItemInfoCard from "@/components/game/ItemInfoCard.vue";
 import { useChestsStore } from "@/stores/chests";
 import { transformApiItem } from "@/utils/itemHelpers";
 const API_BASE_URL = 'http://147.45.253.24:5035/';
 const BASE_URL = API_BASE_URL.replace('/api/v1', '');
 export default {
   name: "BlackmarketView",
-  components: { FrameComponent, ModalComponent },
+  components: { FrameComponent, ModalComponent, ItemInfoCard },
   data() {
     return {
       showPreviewModal: false,

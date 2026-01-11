@@ -15,7 +15,7 @@ export const useNewsStore = defineStore('news', {
             this.loading = true
             this.error = null
             try {
-                const response = await apiClient.get('/news')
+                const response = await apiClient.get('/news/')
                 this.news = response.data.news
                 this.loading = false
                 return response.data.news

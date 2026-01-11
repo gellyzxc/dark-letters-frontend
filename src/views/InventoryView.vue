@@ -3,16 +3,7 @@
     <transition name="fade">
       <div v-if="showItemTooltip && hoveredItem" class="item-tooltip" :style="tooltipPosition">
         <frame-component class="tooltip-frame">
-          <div class="tooltip-content">
-            <div class="item-name">{{ hoveredItem.name }}</div>
-            <div class="item-description">{{ hoveredItem.description || 'No description.' }}</div>
-            <div class="item-bonuses" v-if="hoveredItem.stats && hoveredItem.stats.length > 0">
-              <div v-for="(stat, index) in hoveredItem.stats" :key="index" class="bonus-line">
-                <span class="bonus-label">{{ stat.label }} <span class="bonus-value">{{ stat.value }}</span>
-                </span>
-              </div>
-            </div>
-          </div>
+          <item-info-card :item="hoveredItem" variant="tooltip" />
         </frame-component>
       </div>
     </transition>
@@ -46,8 +37,10 @@
           </div>
         </div>
         <div class="sword">
-          <drag-drop-component class="equipment-slot" style="display: flex;" group-id="inventory"
-            :item-data="equippedSword" @item-dropped="onEquipmentDropped('sword', $event)">
+          <drag-drop-component class="equipment-slot"
+            style="display: flex; justify-content: center; align-items: center;" group-id="inventory"
+            :item-data="equippedSword" @item-dropped="onEquipmentDropped('sword', $event)"
+            @drag-start="onDragStartHandler" @drag-end="onDragEndHandler">
             <div v-if="equippedSword" class="item" @mouseenter="onItemHover(equippedSword, $event)"
               @mouseleave="onItemLeave">
               <img v-if="equippedSword.photo" :src="getImageUrl(equippedSword.photo)" :alt="equippedSword.name"
@@ -59,8 +52,10 @@
           </drag-drop-component>
         </div>
         <div class="cloth">
-          <drag-drop-component class="equipment-slot" style="display: flex;" group-id="inventory"
-            :item-data="equippedCloth" @item-dropped="onEquipmentDropped('cloth', $event)">
+          <drag-drop-component class="equipment-slot"
+            style="display: flex; justify-content: center; align-items: center;" group-id="inventory"
+            :item-data="equippedCloth" @item-dropped="onEquipmentDropped('cloth', $event)"
+            @drag-start="onDragStartHandler" @drag-end="onDragEndHandler">
             <div v-if="equippedCloth" class="item" @mouseenter="onItemHover(equippedCloth, $event)"
               @mouseleave="onItemLeave">
               <img v-if="equippedCloth.photo" :src="getImageUrl(equippedCloth.photo)" :alt="equippedCloth.name"
@@ -73,8 +68,10 @@
           </drag-drop-component>
         </div>
         <div class="amulet">
-          <drag-drop-component class="equipment-slot" group-id="inventory" style="display: flex;"
-            :item-data="equippedAmulet" @item-dropped="onEquipmentDropped('amulet', $event)">
+          <drag-drop-component class="equipment-slot" group-id="inventory"
+            style="display: flex; justify-content: center;" :item-data="equippedAmulet"
+            @item-dropped="onEquipmentDropped('amulet', $event)" @drag-start="onDragStartHandler"
+            @drag-end="onDragEndHandler">
             <div v-if="equippedAmulet" class="item" @mouseenter="onItemHover(equippedAmulet, $event)"
               @mouseleave="onItemLeave">
               <img v-if="equippedAmulet.photo" :src="getImageUrl(equippedAmulet.photo)" :alt="equippedAmulet.name"
@@ -86,9 +83,11 @@
             </template>
           </drag-drop-component>
         </div>
-        <div class="inventory">
+        <div class="inventory" @dragover.prevent="onInventoryDragOver" @dragleave.prevent="onInventoryDragLeave">
           <drag-drop-component v-for="(slot, index) in inventorySlots" :key="index" class="slot" group-id="inventory"
-            :item-data="slot.item" @item-dropped="onItemDropped('inventory', index, $event)">
+            :item-data="slot.item" :slot-index="index" :grid-cols="8" :grid-rows="8"
+            :occupied-slots="inventorySlots.map(s => s.item)" @item-dropped="onItemDropped('inventory', index, $event)"
+            @drag-start="onDragStartHandler" @drag-end="onDragEndHandler">
             <div v-if="slot.item && isFirstSlotOfItem(index)" class="item" :style="getItemStyle(slot.item, index)"
               @mouseenter="onItemHover(slot.item, $event)" @mouseleave="onItemLeave">
               <img v-if="slot.item.photo" :src="getImageUrl(slot.item.photo)" :alt="slot.item.name"
@@ -119,6 +118,9 @@
 @use '@/assets/styles/variables' as *;
 
 .page {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -155,23 +157,23 @@
       }
 
       .stats-bottom {
-        padding: 0 $spacing-sm;
-        width: calc(583px - 2 * $spacing-sm);
+        padding: 0 0.5rem;
+        width: calc(560px - 1rem);
         height: 81px;
         bottom: 23px;
-        right: 24px;
+        right: 20px;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
         align-items: flex-start;
         color: white;
-        font-size: 2rem;
+        font-size: 1.7rem;
 
         .col {
           display: flex;
           flex-direction: column;
           align-items: flex-end;
-          gap: 0.4rem;
+          gap: 1rem;
         }
       }
 
@@ -202,22 +204,22 @@
       }
 
       .sword {
-        top: 182px;
-        left: 44px;
+        top: 175px;
+        left: 37px;
         height: 176px;
         width: 76px;
       }
 
       .amulet {
-        top: 537px;
-        left: 417px;
+        top: 535px;
+        left: 414px;
         height: 86px;
         width: 74px;
       }
 
       .cloth {
-        top: 333px;
-        left: 417px;
+        top: 325px;
+        left: 410px;
         height: 143px;
         width: 97px;
       }
@@ -230,7 +232,7 @@
         position: absolute;
         left: 598px;
         top: 94px;
-        column-gap: 3px;
+        column-gap: 2px;
         row-gap: 7px;
 
         .slot {
@@ -247,7 +249,7 @@
 
       .sell-zone {
         position: absolute;
-        right: 642px;
+        right: 617px;
         top: 732px;
         transform: translateY(-50%);
         width: 550px;
@@ -451,15 +453,16 @@
 }
 </style>
 <script>
+import { API_BASE_URL } from "@/api/client";
 import DragDropComponent from "@/components/DragDropComponent.vue";
 import FrameComponent from "@/components/game/FrameComponent.vue";
+import ItemInfoCard from "@/components/game/ItemInfoCard.vue";
 import { useInventoryStore } from "@/stores/inventory";
 import { transformApiItem, positionToIndex, indexToPosition } from "@/utils/itemHelpers";
-const API_BASE_URL = 'http://147.45.253.24:5035/';
-const BASE_URL = API_BASE_URL.replace('/api/v1', '');
+const BASE_URL = API_BASE_URL;
 export default {
   name: "InventoryView",
-  components: { DragDropComponent, FrameComponent },
+  components: { DragDropComponent, FrameComponent, ItemInfoCard },
   data() {
     return {
       character: null,
@@ -525,6 +528,34 @@ export default {
       }
       this.showItemTooltip = false;
       this.hoveredItem = null;
+    },
+    onInventoryDragOver(e) {
+      e.preventDefault();
+    },
+    onInventoryDragLeave(e) {
+      const inventoryEl = e.currentTarget;
+      const rect = inventoryEl.getBoundingClientRect();
+      const x = e.clientX;
+      const y = e.clientY;
+      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        if (window.__dragState) {
+          window.__dragState = {
+            itemSize: window.__dragState.itemSize,
+            sourceItemId: window.__dragState.sourceItemId,
+            hoverIndex: null
+          };
+        }
+      }
+    },
+    onDragStartHandler() {
+      if (this.hoverTimeout) {
+        clearTimeout(this.hoverTimeout);
+        this.hoverTimeout = null;
+      }
+      this.showItemTooltip = false;
+      this.hoveredItem = null;
+    },
+    onDragEndHandler() {
     },
     isFirstSlotOfItem(index) {
       const item = this.inventorySlots[index]?.item;
@@ -650,16 +681,12 @@ export default {
       console.log('Equipment dropped:', { slotType, droppedData, currentData })
       if (!droppedData) return;
       const allowedTypes = {
-        sword: ['blades', 'staff'],
+        sword: ['blades', 'staff', 'blade_and_shield'],
         cloth: ['belt', 'chest', 'cloak', 'mantle'],
         amulet: ['amulet', 'ring']
       };
       if (!allowedTypes[slotType].includes(droppedData.type)) {
         console.log(`Cannot equip ${droppedData.type} in ${slotType} slot`);
-        return;
-      }
-      if (droppedData.type === 'blade_and_shield') {
-        console.log('blade_and_shield cannot be equipped yet');
         return;
       }
       const slotProp = `equipped${slotType.charAt(0).toUpperCase() + slotType.slice(1)}`;

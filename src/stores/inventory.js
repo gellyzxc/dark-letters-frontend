@@ -44,6 +44,20 @@ export const useInventoryStore = defineStore('inventory', {
                 throw error
             }
         },
+        async rerollShop() {
+            this.loading = true
+            this.error = null
+            try {
+                const response = await apiClient.get('/item/shop/reroll')
+                this.shopItems = response.data.items
+                this.loading = false
+                return response.data.items
+            } catch (error) {
+                this.error = error.response?.data?.message || 'Failed to reroll shop'
+                this.loading = false
+                throw error
+            }
+        },
         async updateItem(itemId, updates) {
             this.loading = true
             this.error = null

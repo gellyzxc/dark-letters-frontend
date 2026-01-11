@@ -7,8 +7,8 @@
           <div class="data">
             <div class="content">
               <span>{{ n.name }}
-                <br>
-                {{ n.description.slice(0, 100) }}{{ n.description.length > 100 ? '...' : '' }}
+                <span style="color: #7B7B7B"> {{ n.description.slice(0, 100) }}{{ n.description.length > 100 ? '...' :
+                  '' }}</span>
               </span>
             </div>
             <div class="bottom">
@@ -118,8 +118,7 @@
           span {
             width: fit-content;
             font-size: $font-size-base;
-            color: $color-text-disabled;
-            font-weight: $font-weight-semibold;
+            font-weight: 400;
             font-family: $font-family-primary;
           }
         }

@@ -1,6 +1,7 @@
 <template>
   <div class="page blacksmith-view">
     <div class="image">
+      <div class="reroll" :class="{ 'spinning': inventoryStore.loading }" @click="handleReroll"></div>
       <div class="items-col col-1">
         <div class="item" v-for="(item, index) in shopItems.slice(0, 2)" :key="'col1-' + index" @click="openItem(item)">
           <frame-component class="main-frame" type="shop-frame">
@@ -19,27 +20,15 @@
     </div>
   </div>
   <modal-component :open="showPreviewModal" @will-dismiss="showPreviewModal = false">
-    <frame-component class="item-frame" style="max-width: 40svw; overflow: hidden;">
-      <div class="item-card preview-item-card" v-if="selectedItem">
-        <div class="glow" :class="`glow-${selectedItem.rarity}`"></div>
-        <div class="item-content-flex">
-          <div class="item-left">
-            <div class="item-name">{{ selectedItem.name }}</div>
-            <div class="item-description">{{ selectedItem.description || 'No description.' }}</div>
+    <frame-component class="item-frame" style="max-width: 40svw">
+      <item-info-card v-if="selectedItem" :item="selectedItem" variant="tooltip">
+        <template #actions>
+          <div class="item-price-block" @click="purchaseItem"
+            style="position: absolute;bottom: 12px;right: 12px;font-size: 1.1rem;">
+            <span class="item-price">{{ selectedItem.price }} gold</span>
           </div>
-          <div class="item-right">
-            <div class="item-bonuses">
-              <div v-for="stat in selectedItem.stats" :key="stat.label" class="bonus-line">
-                <span class="bonus-label">{{ stat.label }}</span>
-                <span class="bonus-value">{{ stat.value }}</span>
-              </div>
-            </div>
-            <div v-if="selectedItem.price" class="item-price-block" @click="purchaseItem">
-              <span class="item-price">{{ selectedItem.price }} gold</span>
-            </div>
-          </div>
-        </div>
-      </div>
+        </template>
+      </item-info-card>
     </frame-component>
   </modal-component>
   <modal-component :open="showRewardModal" @will-dismiss="closeRewardModal">
@@ -48,27 +37,8 @@
         <div v-for="i in 20" :key="i" class="particle" :style="getParticleStyle(i)"></div>
       </div>
       <frame-component class="item-frame" style="overflow: hidden;">
-        <div class="item-card reward-item-card" v-if="selectedItem">
-          <div class="glow" :class="`glow-${selectedItem.rarity}`"></div>
-          <div class="item-icon">
-            <img v-if="selectedItem.photo" :src="getImageUrl(selectedItem.photo)" :alt="selectedItem.name" />
-            <span v-else>{{ selectedItem.icon || '📦' }}</span>
-          </div>
-          <div class="item-content-flex">
-            <div class="item-left">
-              <div class="item-name">{{ selectedItem.name }}</div>
-              <div class="item-description">{{ selectedItem.description || 'No description.' }}</div>
-            </div>
-            <div class="item-right">
-              <div class="item-bonuses">
-                <div v-for="stat in selectedItem.stats" :key="stat.label" class="bonus-line">
-                  <span class="bonus-label">{{ stat.label }}</span>
-                  <span class="bonus-value">{{ stat.value }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <item-info-card v-if="selectedItem" :item="selectedItem" variant="tooltip" :show-icon="true"
+          :show-glow="true" />
       </frame-component>
     </div>
   </modal-component>
@@ -77,21 +47,57 @@
 @use '@/assets/styles/variables' as *;
 
 .page {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  flex-direction: row;
-  justify-items: center;
+  flex-direction: column;
   align-items: center;
-  position: relative;
-  height: 100%;
+  justify-content: center;
   width: 100%;
+  height: calc(100% - #{$spacing-2xl + $spacing-md});
   max-height: 1080px;
   max-width: 1920px;
-  justify-content: center;
+  padding: $spacing-xl;
 
   .image {
     padding-bottom: 40px;
     height: min(90vh, 972px);
     position: relative;
+
+    .reroll {
+      height: 10%;
+      width: 7%;
+      position: absolute;
+      bottom: 8.5%;
+      right: 46.55%;
+      border-radius: 50%;
+      background-image: url('@/assets/icons/reroll.png');
+      cursor: pointer;
+      transition: transform 0.2s ease-in-out;
+
+      &:hover:not(.spinning) {
+        transform: scale(1.1);
+      }
+
+      &:active:not(.spinning) {
+        transform: scale(0.95);
+      }
+
+      &.spinning {
+        animation: spin 1s linear infinite;
+        pointer-events: none;
+      }
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
     img {
       max-height: min(90vh, 972px);
@@ -661,13 +667,14 @@
 <script>
 import FrameComponent from "@/components/game/FrameComponent.vue";
 import ModalComponent from "@/components/ModalComponent.vue";
+import ItemInfoCard from "@/components/game/ItemInfoCard.vue";
 import { useInventoryStore } from "@/stores/inventory";
 import { transformApiItem } from "@/utils/itemHelpers";
-const API_BASE_URL = 'http://147.45.253.24:5035/';
-const BASE_URL = API_BASE_URL.replace('/api/v1', '');
+import { API_BASE_URL } from "@/api/client";
+const BASE_URL = API_BASE_URL
 export default {
   name: "ShopView",
-  components: { ModalComponent, FrameComponent },
+  components: { ModalComponent, FrameComponent, ItemInfoCard },
   data() {
     return {
       showPreviewModal: false,
@@ -701,6 +708,22 @@ export default {
     }
   },
   methods: {
+    async handleReroll() {
+      if (this.inventoryStore.loading) return;
+      try {
+        const items = await this.inventoryStore.rerollShop();
+        this.shopItems = items.map(apiItem => {
+          const transformed = transformApiItem(apiItem);
+          return {
+            ...transformed,
+            rarity: this.getRarityFromType(transformed.type)
+          };
+        });
+      } catch (error) {
+        console.error('Failed to reroll shop:', error);
+        alert('Failed to reroll shop. Please try again.');
+      }
+    },
     async loadShopItems() {
       try {
         const items = await this.inventoryStore.fetchShopItems();

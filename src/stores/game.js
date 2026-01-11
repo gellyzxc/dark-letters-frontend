@@ -16,7 +16,7 @@ export const useGameStore = defineStore('game', {
             this.loading = true
             this.error = null
             try {
-                const response = await apiClient.get('/game')
+                const response = await apiClient.get('/game/')
                 this.gameTypes = response.data
                 this.loading = false
                 return response.data

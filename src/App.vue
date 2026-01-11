@@ -8,6 +8,7 @@
 .app-container {
   max-width: 1920px;
   max-height: 1080px;
+  display: flex;
   /* width: 100vw;
   height: 100vh; */
   margin: 0 auto;

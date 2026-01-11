@@ -48,8 +48,9 @@
                   </div>
                   <div class="avatar-modal-title" style="margin-top:1rem;">Choose your frame</div>
                   <div class="frame-list">
-                    <div v-for="n in 8" :key="'frame-' + n" class="frame-option" @click="selectFrame(n)">
-                      <div class="profile-frame-placeholder">Frame {{ n }}</div>
+                    <div v-for="avatar in ['2.png', '3.png', '4.png', '5.png', '6.png', '7.png', '8.png']" :key="avatar"
+                      class="avatar-option" @click="selectFrame(avatar)">
+                      <img :src="BASE_URL + 'static/frame/' + avatar" class="user-frame-image" />
                     </div>
                   </div>
                 </div>
@@ -85,8 +86,8 @@
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      border: 2px solid rgba($color-gold-primary, 0.3);
-      box-shadow: 0 0 8px rgba($color-gold-primary, 0.5);
+      border: 2px solid rgb(110, 110, 110);
+      box-shadow: 0 0 8px rgb(110, 110, 110);
       transition: box-shadow $transition-base;
       object-fit: cover;
     }
@@ -99,7 +100,7 @@
   padding: $spacing-md $spacing-md $spacing-lg $spacing-md;
   background: $color-bg-modal;
   border-radius: $radius-xl;
-  box-shadow: $shadow-lg, 0 0 0 2px $color-brown-medium, 0 0 0 8px rgba($color-gold-primary, 0.08);
+  box-shadow: $shadow-lg, 0 0 0 2px $color-brown-medium, 0 0 0 8px rgb(110, 110, 110);
 }
 
 .avatar-modal-content {
@@ -111,11 +112,9 @@
 
 .avatar-modal-title {
   font-size: $font-size-lg;
-  font-weight: $font-weight-semibold;
   color: $color-text-primary;
   margin-bottom: $spacing-sm;
   text-align: center;
-  font-family: $font-family-display;
 }
 
 .avatar-list,
@@ -140,18 +139,26 @@
     height: 48px;
     border-radius: 50%;
     border: 2px solid rgba($color-text-primary, 0.2);
-    box-shadow: 0 0 8px rgba($color-gold-primary, 0.3);
+    box-shadow: 0 0 8px rgb(110, 110, 110);
+    transition: box-shadow $transition-base, transform $transition-fast;
+    object-fit: cover;
+  }
+
+  .user-frame-image {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
     transition: box-shadow $transition-base, transform $transition-fast;
     object-fit: cover;
   }
 
   &:hover .user-avatar-image {
-    box-shadow: 0 0 0 3px $color-gold-primary, 0 0 12px rgba($color-gold-primary, 0.5), $glow-gold-sm;
+    box-shadow: 0 0 0 3px rgb(110, 110, 110), 0 0 12px rgb(110, 110, 110), $glow-gold-sm;
   }
 
   &.selected .user-avatar-image {
-    border-color: $color-gold-primary;
-    box-shadow: 0 0 0 3px $color-gold-primary, 0 0 16px rgba($color-gold-primary, 0.8), $glow-gold-sm;
+    border-color: rgb(110, 110, 110);
+    box-shadow: 0 0 0 3px rgb(110, 110, 110), 0 0 16px rgb(110, 110, 110), $glow-gold-sm;
   }
 
   &:active .user-avatar-image {
@@ -171,9 +178,9 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: repeating-linear-gradient(135deg, $color-gold-primary 0 6px, $color-bg-elevated 6px 12px);
+    background: repeating-linear-gradient(135deg, rgb(110, 110, 110) 0 6px, $color-bg-elevated 6px 12px);
     border: 2px solid rgba($color-text-primary, 0.1);
-    box-shadow: 0 0 8px rgba($color-gold-primary, 0.5);
+    box-shadow: 0 0 8px rgb(110, 110, 110);
     color: $color-text-primary;
     display: flex;
     align-items: center;
@@ -184,7 +191,7 @@
   }
 
   &:hover .profile-frame-placeholder {
-    box-shadow: 0 0 0 3px $color-gold-primary, 0 0 12px rgba($color-gold-primary, 0.5), $glow-gold-sm;
+    box-shadow: 0 0 0 3px rgb(110, 110, 110), 0 0 12px rgb(110, 110, 110), $glow-gold-sm;
   }
 
   &:active .profile-frame-placeholder {
@@ -196,15 +203,16 @@
 @use '@/assets/styles/variables' as *;
 
 .page {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
-  max-height: 1080px;
-  max-width: 1920px;
-  padding: $spacing-xl;
 
   .main {
     display: flex;
@@ -216,7 +224,7 @@
 }
 
 .settings-content {
-  width: calc(100% - #{$spacing-3xl * 2}) !important;
+  width: calc(100% - 6rem) !important;
   height: calc(100% - #{$spacing-xl}) !important;
   padding: $spacing-md $spacing-2xl !important;
   overflow-y: auto;
@@ -289,7 +297,7 @@
       }
 
       .value {
-        color: rgba(255, 255, 255, 0.7);
+        color: rgba(255, 255, 255, 1);
         text-align: right;
 
         &.password {
@@ -348,7 +356,7 @@
   font-family: $font-family-primary;
   background: transparent;
   color: $color-text-primary;
-  font-size: $font-size-base;
+  font-size: 1.1rem;
   padding: 0;
   position: relative;
 }
@@ -364,8 +372,8 @@
 }
 
 .grid-title {
+  font-size: 1.2rem;
   grid-column: 1;
-  font-size: $font-size-lg;
   font-weight: $font-weight-normal;
   color: $color-text-primary;
   font-family: $font-family-primary;
@@ -374,7 +382,6 @@
 
 .grid-date {
   grid-column: 2;
-  font-size: $font-size-sm;
   color: $color-text-primary;
   text-align: right;
   font-family: $font-family-primary;
@@ -383,8 +390,6 @@
 
 .grid-section-title {
   grid-column: 1;
-  font-size: $font-size-base;
-  font-weight: $font-weight-semibold;
   color: $color-text-primary;
   font-family: $font-family-primary;
   padding-bottom: $spacing-xs;
@@ -396,7 +401,7 @@
 
 .grid-label {
   grid-column: 1;
-  font-size: $font-size-sm;
+  font-size: 1.2rem;
   color: $color-text-disabled;
   font-weight: $font-weight-normal;
   font-family: $font-family-primary;
@@ -410,7 +415,6 @@
 
 .grid-label-small {
   grid-column: 1;
-  font-size: $font-size-xs;
   color: $color-text-disabled;
   font-weight: $font-weight-normal;
   font-family: $font-family-primary;
@@ -424,8 +428,6 @@
 
 .grid-value {
   grid-column: 2;
-  font-size: $font-size-sm;
-  color: $color-text-disabled;
   font-weight: $font-weight-normal;
   font-family: $font-family-primary;
   text-align: right;
@@ -477,15 +479,8 @@ import { useUserStore } from '@/stores/user'
 import { useCharacterStore } from '@/stores/character'
 import FrameComponent from "@/components/game/FrameComponent.vue"
 import ModalComponent from "@/components/ModalComponent.vue"
-import assasinAvatar from '@/assets/images/classicons/assasin.png'
-import dwarfAvatar from '@/assets/images/classicons/dwarf.png'
-import elfAvatar from '@/assets/images/classicons/elf.png'
-import gnomAvatar from '@/assets/images/classicons/gnom.png'
-import humanAvatar from '@/assets/images/classicons/human.png'
-import mageAvatar from '@/assets/images/classicons/mage.png'
-import warriorAvatar from '@/assets/images/classicons/warrior.png'
-const API_BASE_URL = 'http://147.45.253.24:5035/';
-const BASE_URL = API_BASE_URL.replace('/api/v1', '');
+import { API_BASE_URL } from '@/api/client'
+const BASE_URL = API_BASE_URL;
 export default {
   name: "SettingsView",
   components: { FrameComponent, ModalComponent },
@@ -530,7 +525,7 @@ export default {
       if (!userStore.user) return
       try {
         await userStore.updateUser({
-          frame: `static/frame/${id}.png`,
+          frame: `static/frame/${id}`,
         })
         showAvatarModal.value = false
       } catch (error) {
@@ -593,8 +588,7 @@ export default {
         }
       }
     })
-    const API_BASE_URL = 'http://147.45.253.24:5035/';
-    const BASE_URL = API_BASE_URL.replace('/api/v1', '');
+    const BASE_URL = API_BASE_URL;
     return {
       showAvatarModal,
       currentDate,

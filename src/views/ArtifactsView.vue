@@ -5,7 +5,8 @@
         <frame-component v-for="slot in cardSlots" :key="slot.id" class="frame" type="vertical-card">
           <drag-drop-component class="frame-slot" group-id="artifacts" :item-data="slot.card"
             @item-dropped="handleCardDropped(slot.id, $event)">
-            <img v-if="slot.card" :src="slot.card.imageUrl" :alt="slot.card.name" />
+            <img v-if="slot.card" :src="slot.card.imageUrl" :alt="slot.card.name" @click="handleCardClick(slot)"
+              class="clickable-card" />
             <template #placeholder>
               <div class="empty-frame-placeholder">
                 <span>Empty Slot</span>
@@ -15,14 +16,6 @@
         </frame-component>
       </div>
       <div class="row closed-cards">
-        <drag-drop-component group-id="artifacts" :item-data="null" @item-dropped="handleCardRemoved"
-          class="remove-zone">
-          <template #placeholder>
-            <div class="remove-placeholder">
-              <span>Drop here to remove</span>
-            </div>
-          </template>
-        </drag-drop-component>
         <div v-for="card in [...availableCards, ...closedCards]" :key="card.id" class="card-container">
           <drag-drop-component group-id="artifacts" :item-data="card" :disabled="!card.isFlipped"
             @item-dropped="() => { }" :class="{ 'flipped-card-drag': card.isFlipped }">
@@ -43,8 +36,8 @@ import DragDropComponent from "@/components/DragDropComponent.vue";
 import TestCardImage from "@/assets/images/cards/test.png";
 import ClosedCardImage from "@/assets/images/cards/closed.png";
 import { useArtifactsStore } from "@/stores/artifacts";
-const API_BASE_URL = 'http://147.45.253.24:5035/';
-const BASE_URL = API_BASE_URL.replace('/api/v1', '');
+import { API_BASE_URL } from "@/api/client";
+const BASE_URL = API_BASE_URL;
 export default {
   name: "ArtifactsView",
   components: { FrameComponent, DragDropComponent },
@@ -122,6 +115,19 @@ export default {
     flipCard(card) {
       card.isFlipped = true;
     },
+    async handleCardClick(slot) {
+      if (!slot.card) return;
+      const slotIndex = this.cardSlots.findIndex(s => s.id === slot.id);
+      if (slotIndex === -1) return;
+      try {
+        await this.artifactsStore.unequipArtifact(slot.card.id);
+        this.availableCards.push({ ...slot.card, isFlipped: true, isEquipped: false });
+        this.cardSlots[slotIndex].card = null;
+      } catch (error) {
+        console.error('Failed to unequip artifact:', error);
+        await this.loadArtifacts();
+      }
+    },
     async handleCardRemoved({ droppedData }) {
       const fromSlotIndex = this.cardSlots.findIndex(
         s => s.card && s.card.id === droppedData.id
@@ -184,6 +190,8 @@ export default {
 @use '@/assets/styles/variables' as *;
 
 .page {
+  background-image: url('@/assets/images/background/artifacts.png');
+  background-size: cover;
   padding: $spacing-xl;
   height: 100%;
 

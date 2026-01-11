@@ -3,16 +3,7 @@
     <transition name="fade">
       <div v-if="showItemTooltip && hoveredItem" class="item-tooltip" :style="tooltipPosition">
         <frame-component class="tooltip-frame">
-          <div class="tooltip-content">
-            <div class="item-name">{{ hoveredItem.name }}</div>
-            <div class="item-description">{{ hoveredItem.description || 'No description.' }}</div>
-            <div class="item-bonuses" v-if="hoveredItem.stats && hoveredItem.stats.length > 0">
-              <div v-for="(stat, index) in hoveredItem.stats" :key="index" class="bonus-line">
-                <span class="bonus-label">{{ stat.label }} <span class="bonus-value">{{ stat.value }}</span>
-                </span>
-              </div>
-            </div>
-          </div>
+          <item-info-card :item="hoveredItem" variant="tooltip" />
         </frame-component>
       </div>
     </transition>
@@ -20,25 +11,14 @@
       <div v-if="showReforgedTooltip && reforgedItem" class="item-tooltip reforged-tooltip"
         :style="reforgedTooltipPosition">
         <frame-component class="tooltip-frame">
-          <div class="tooltip-content forgeed-tooltip-content">
-            <div class="reforge-header">
-              <div class="item-name">{{ reforgedItem.name }}</div>
-              <div class="reforge-info">
+          <item-info-card :item="reforgedItem" variant="tooltip" :show-header="true">
+            <template #header-extra>
+              <div class="reforge-info" style="position: absolute; bottom: 12px;">
                 <div class="gold-info">Gold: {{ character ? character.gold : 0 }}</div>
                 <div class="reforge-cost">Reforge: {{ reforgeCost }} gold</div>
               </div>
-            </div>
-            <div class="item-description">{{ reforgedItem.description || 'Reforged item.' }}</div>
-            <div class="item-bonuses" v-if="reforgedItem.stats && reforgedItem.stats.length > 0">
-              <div v-for="(stat, index) in reforgedItem.stats" :key="index" class="bonus-line">
-                <span class="bonus-label">{{ stat.label }} <span class="bonus-value">{{ stat.value }}</span>
-                </span>
-              </div>
-            </div>
-            <div class="reforge-actions" v-if="hasReforged">
-              <button class="accept-btn" @click="acceptReforge">Accept</button>
-            </div>
-          </div>
+            </template>
+          </item-info-card>
         </frame-component>
       </div>
     </transition>
@@ -47,10 +27,11 @@
       <div class="content">
         <div class="forge">
           <drag-drop-component class="equipment-slot" group-id="inventory" :item-data="forgeItem"
-            @item-dropped="onForgeDropped($event)">
+            @item-dropped="onForgeDropped($event)" @drag-start="onDragStartHandler" @drag-end="onDragEndHandler"
+            style="display: flex; justify-content: center; align-items: center;">
             <div v-if="forgeItem" class="item" @mouseenter="onItemHover(forgeItem, $event)" @mouseleave="onItemLeave">
-              <img v-if="forgeItem.photo" style="max-height: 110px;" :src="getImageUrl(forgeItem.photo)" :alt="forgeItem.name"
-                class="item-image" />
+              <img v-if="forgeItem.photo" style="max-height: 110px;" :src="getImageUrl(forgeItem.photo)"
+                :alt="forgeItem.name" class="item-image" />
               <div v-else class="icon">{{ forgeItem.icon || '📦' }}</div>
             </div>
             <template #placeholder>
@@ -65,33 +46,16 @@
                 <div v-for="i in 20" :key="i" class="particle" :style="getParticleStyle(i)"></div>
               </div>
               <frame-component class="item-frame">
-                <div class="item-card new-item-card">
-                  <div class="glow" :class="`glow-${reforgeItem.rarity || 'common'}`"></div>
-                  <div class="item-content-flex">
-                    <div class="item-left">
-                      <div class="item-name">{{ reforgeItem.name }}</div>
-                      <div class="item-description">{{ reforgeItem.description || 'Reforged item.' }}</div>
-                    </div>
-                    <div class="item-right">
-                      <div class="item-bonuses">
-                        <div v-for="stat in reforgeItem.stats || []" :key="stat.label" class="bonus-line">
-                          <span class="bonus-label">{{ stat.label }}</span>
-                          <span class="bonus-value">{{ stat.value }}</span>
-                        </div>
-                      </div>
-                      <div v-if="reforgeItem.price" class="item-price-block">
-                        <span class="item-price">{{ reforgeItem.price }} gold</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <item-info-card variant="tooltip" :item="reforgeItem" />
               </frame-component>
             </div>
           </div>
         </transition>
-        <div class="inventory">
+        <div class="inventory" @dragover.prevent="onInventoryDragOver" @dragleave.prevent="onInventoryDragLeave">
           <drag-drop-component v-for="(slot, index) in inventorySlots" :key="index" class="slot" group-id="inventory"
-            :item-data="slot.item" @item-dropped="onItemDropped('inventory', index, $event)">
+            :item-data="slot.item" :slot-index="index" :grid-cols="8" :grid-rows="8"
+            :occupied-slots="inventorySlots.map(s => s.item)" @item-dropped="onItemDropped('inventory', index, $event)"
+            @drag-start="onDragStartHandler" @drag-end="onDragEndHandler">
             <div v-if="slot.item && isFirstSlotOfItem(index)" class="item" :style="getItemStyle(slot.item, index)"
               @mouseenter="onItemHover(slot.item, $event)" @mouseleave="onItemLeave">
               <img v-if="slot.item.photo" :src="getImageUrl(slot.item.photo)" :alt="slot.item.name"
@@ -111,6 +75,9 @@
 @use '@/assets/styles/variables' as *;
 
 .page {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -563,150 +530,20 @@
     .item-frame {
       height: 400px;
     }
-
-    .new-item-card {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      border-radius: 18px;
-      box-shadow: 0 0 24px 4px #1a1310, 0 0 0 2px #3a2a1a, 0 0 0 8px rgba(212, 175, 55, 0.08);
-      padding: 0;
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
-      font-family: 'JetBrains Mono', 'Fira Mono', 'Consolas', monospace;
-      color: #e0d8c0;
-
-      .glow {
-        position: absolute;
-        top: -20px;
-        left: -20px;
-        right: -20px;
-        bottom: -20px;
-        border-radius: 12px;
-        opacity: 0.4;
-        filter: blur(25px);
-        z-index: -1;
-
-        &.glow-legendary {
-          background: radial-gradient(circle, rgba(255, 215, 0, 0.6) 0%, rgba(255, 140, 0, 0.4) 50%, transparent 70%);
-        }
-
-        &.glow-mystical {
-          background: radial-gradient(circle, rgba(138, 43, 226, 0.6) 0%, rgba(75, 0, 130, 0.4) 50%, transparent 70%);
-        }
-
-        &.glow-wooden {
-          background: radial-gradient(circle, rgba(139, 69, 19, 0.6) 0%, rgba(160, 82, 45, 0.4) 50%, transparent 70%);
-        }
-
-        &.glow-common {
-          background: radial-gradient(circle, rgba(169, 169, 169, 0.6) 0%, rgba(105, 105, 105, 0.4) 50%, transparent 70%);
-        }
-      }
-
-      .item-content-flex {
-        display: flex;
-        flex-direction: row;
-        padding: 1rem;
-        width: calc(100% - 2rem);
-        height: calc(100% - 2rem);
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 2.5rem;
-        position: relative;
-      }
-
-      .item-left {
-        flex: 2;
-        display: flex;
-        flex-direction: column;
-        gap: 1.2rem;
-
-        .item-name {
-          font-size: 2rem;
-          font-weight: 600;
-          color: $color-text-primary;
-          margin-bottom: 0.5rem;
-          letter-spacing: 0.01em;
-          line-height: 1.2;
-          text-shadow: 0 2px 8px #000, 0 0 2px #d4af37;
-        }
-
-        .item-description {
-          font-size: 1.1rem;
-          color: $color-text-secondary;
-          line-height: 1.5;
-          word-break: break-word;
-          text-shadow: 0 1px 2px #000;
-        }
-      }
-
-      .item-right {
-        flex: 1.2;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 1.2rem;
-        height: 100%;
-
-        .item-bonuses {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-          gap: 0.5rem;
-          margin-bottom: 1.2rem;
-
-          .bonus-line {
-            font-size: 1.1rem;
-            color: #e0d8c0;
-            display: flex;
-            gap: 0.5em;
-            justify-content: flex-end;
-
-            .bonus-label {
-              color: #b0a890;
-              min-width: 90px;
-              text-align: right;
-            }
-
-            .bonus-value {
-              color: #e0d8c0;
-              font-weight: 600;
-            }
-          }
-        }
-
-        .item-price-block {
-          position: absolute;
-          right: 0;
-          bottom: 0;
-          margin: 0 1.5rem 1.2rem 0;
-
-          .item-price {
-            font-size: 1.2rem;
-            color: #e0d8c0;
-            font-weight: 600;
-            text-align: right;
-            letter-spacing: 0.02em;
-          }
-        }
-      }
-    }
   }
 }
 </style>
 <script>
+import { API_BASE_URL } from "@/api/client";
 import DragDropComponent from "@/components/DragDropComponent.vue";
 import FrameComponent from "@/components/game/FrameComponent.vue";
+import ItemInfoCard from "@/components/game/ItemInfoCard.vue";
 import { useInventoryStore } from "@/stores/inventory";
 import { transformApiItem, positionToIndex, indexToPosition } from "@/utils/itemHelpers";
-const API_BASE_URL = 'http://147.45.253.24:5035/';
-const BASE_URL = API_BASE_URL.replace('/api/v1', '');
+const BASE_URL = API_BASE_URL;
 export default {
   name: "BlacksmithView",
-  components: { DragDropComponent, FrameComponent },
+  components: { DragDropComponent, FrameComponent, ItemInfoCard },
   data() {
     return {
       forgeItem: null,
@@ -867,6 +704,7 @@ export default {
         this.clearItemCells(newSlots, droppedData);
         if (temp) {
           this.fillItemCells(newSlots, temp, sourceInvIndex);
+          this.updateItemPosition(temp, sourceInvIndex);
         }
         this.forgeItem = droppedData;
         this.inventorySlots = newSlots;
@@ -896,10 +734,16 @@ export default {
         this.inventorySlots = newInventorySlots;
         this.updateItemPosition(droppedData, slotIndex);
       } else if (this.forgeItem && this.forgeItem.id === droppedData?.id) {
+        this.showReforgedTooltip = false;
+        if (this.hasReforged && this.reforgedItem) {
+          this.acceptReforge();
+          return;
+        }
         const targetItem = currentData;
         if (targetItem) {
           this.clearItemCells(newInventorySlots, targetItem);
           this.forgeItem = targetItem;
+          this.showForgeTooltip();
         } else {
           this.forgeItem = null;
         }
@@ -924,8 +768,8 @@ export default {
         let left = rect.left + rect.width / 2;
         let transform = 'translate(-50%, -100%)';
         this.reforgedTooltipPosition = {
-          top: `${top}px`,
-          left: `${left}px`,
+          top: `${top - 20}px`,
+          left: `${left + 36}px`,
           transform: transform
         };
       }
@@ -959,8 +803,8 @@ export default {
         let left = rect.left + rect.width / 2;
         let transform = 'translate(-50%, -100%)';
         this.reforgedTooltipPosition = {
-          top: `${top}px`,
-          left: `${left}px`,
+          top: `${top - 20}px`,
+          left: `${left + 36}px`,
           transform: transform
         };
       }
@@ -999,6 +843,34 @@ export default {
         console.error('Failed to accept reforge:', error);
         alert('Failed to save reforged item');
       }
+    },
+    onInventoryDragOver(e) {
+      e.preventDefault();
+    },
+    onInventoryDragLeave(e) {
+      const inventoryEl = e.currentTarget;
+      const rect = inventoryEl.getBoundingClientRect();
+      const x = e.clientX;
+      const y = e.clientY;
+      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        if (window.__dragState) {
+          window.__dragState = {
+            itemSize: window.__dragState.itemSize,
+            sourceItemId: window.__dragState.sourceItemId,
+            hoverIndex: null
+          };
+        }
+      }
+    },
+    onDragStartHandler() {
+      if (this.hoverTimeout) {
+        clearTimeout(this.hoverTimeout);
+        this.hoverTimeout = null;
+      }
+      this.showItemTooltip = false;
+      this.hoveredItem = null;
+    },
+    onDragEndHandler() {
     },
     onItemHover(item, event) {
       if (!item || this.showReforgedTooltip) return;

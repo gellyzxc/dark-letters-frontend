@@ -113,7 +113,7 @@ const skillImages = {
 }
 const characterStore = useCharacterStore()
 const API_BASE_URL_CONST = API_BASE_URL
-const BASE_URL = API_BASE_URL_CONST.replace('/api/v1', '')
+const BASE_URL = API_BASE_URL_CONST
 const pixiContainer = ref(null)
 const nodesData = ref(null)
 let app = null
@@ -576,7 +576,7 @@ onMounted(async () => {
   app.stage.addChild(viewport)
   const blackBackground = new PIXI.Graphics()
   const bgSize = 10000
-  blackBackground.rect(-bgSize, -bgSize, bgSize * 2, bgSize * 2)
+  blackBackground.rect(-bgSize, -bgSize, bgSize * 4, bgSize * 4)
   blackBackground.fill({ color: 0x000000 })
   viewport.addChild(blackBackground)
   const backgroundTexture = await PIXI.Assets.load(SkillsBackground)
@@ -584,7 +584,7 @@ onMounted(async () => {
   backgroundSprite.anchor.set(0.5)
   backgroundSprite.x = 0
   backgroundSprite.y = 0
-  backgroundSprite.scale.set(0.2)
+  backgroundSprite.scale.set(0.5)
   viewport.addChild(backgroundSprite)
   const edgesContainer = new PIXI.Container()
   const nodesContainer = new PIXI.Container()
@@ -707,7 +707,7 @@ onUnmounted(() => {
   position: absolute;
   left: 20px;
   bottom: 20px;
-  height: 539px;
+  height: 439px;
   pointer-events: auto;
   z-index: 10;
 }
@@ -716,10 +716,11 @@ onUnmounted(() => {
   background: #000000;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.25rem;
   padding: 1rem 1.5rem;
   height: calc(100% - 2rem) !important;
   width: calc(100% - 3rem) !important;
+  position: relative;
 }
 
 .stats-header {
@@ -760,15 +761,14 @@ onUnmounted(() => {
 .stats-list {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.1rem;
 }
 
 .stat-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.9rem;
-  padding: 0.25rem 0;
+  font-size: 1.4rem;
 
   .stat-name {
     color: #808080;
@@ -777,19 +777,18 @@ onUnmounted(() => {
 
   .stat-value {
     color: #ffffff;
-    font-weight: 600;
     text-align: right;
   }
 }
 
 .ability-points {
-  margin-top: 1rem;
-  padding-top: 1rem;
+  position: absolute;
+  bottom: 1rem;
+  width: 90%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 1rem;
-  border-top: 1px solid #333333;
+  font-size: 1.4rem;
 
   .points-label {
     color: #808080;

@@ -6,15 +6,18 @@
         {{ item.label }}
       </span>
     </div>
-    <div class="item tag" style="display: flex; flex-direction: row; gap: 0.5rem;"> 
+    <div class="item tag" style="display: flex; flex-direction: row; gap: 0.5rem;">
       <div class="icon" :style="{ backgroundImage: `url(${BASE_URL}${avatar})` }">
-        
+
+      </div>
+      <div class="icon-frame">
+        <img :src="BASE_URL + frame" />
       </div>
       <div style="display: flex; flex-direction: column; gap: 0.2rem;">
         <span>
-        {{ userName }}
-      </span>
-      <span>132 h 14 m</span>
+          {{ userName }}
+        </span>
+        <span>132 h 14 m</span>
       </div>
     </div>
   </div>
@@ -25,6 +28,7 @@
 
 <style scoped lang="scss">
 @use '@/assets/styles/variables' as *;
+
 .header {
   z-index: 1000;
   height: 4rem;
@@ -41,6 +45,7 @@
   .item {
     &.tag {
       align-items: center;
+
       span {
         color: white;
         font-size: 1.25rem;
@@ -53,7 +58,20 @@
         background-position: center;
         background-repeat: no-repeat;
       }
+
+      .icon-frame {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 3rem;
+
+        img {
+          width: 3rem;
+        }
+      }
     }
+
     cursor: pointer;
 
     span {
@@ -97,6 +115,7 @@ import gnomIcon from '@/assets/images/classicons/gnom.png'
 import humanIcon from '@/assets/images/classicons/human.png'
 import mageIcon from '@/assets/images/classicons/mage.png'
 import warriorIcon from '@/assets/images/classicons/warrior.png'
+import { API_BASE_URL } from '@/api/client'
 
 export default {
   name: "LayoutComponent",
@@ -107,7 +126,7 @@ export default {
     const userStore = useUserStore()
 
     userStore.fetchCurrentUser()
-    
+
     const classIcons = {
       assasin: assasinIcon,
       dwarf: dwarfIcon,
@@ -117,15 +136,14 @@ export default {
       mage: mageIcon,
       warrior: warriorIcon
     }
-    
+
     const userName = computed(() => userStore.user?.login)
     const time = computed(() => userStore.user?.created_at)
     const frame = computed(() => userStore.user?.frame)
     const avatar = computed(() => userStore.user?.avatar)
 
-    const API_BASE_URL = 'http://147.45.253.24:5035/';
-    const BASE_URL = API_BASE_URL.replace('/api/v1', '');
-    
+    const BASE_URL = API_BASE_URL;
+
     return {
       userName,
       frame,

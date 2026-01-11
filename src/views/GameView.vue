@@ -1,10 +1,22 @@
 <template>
   <div class="page game-view">
     <div class="header">
-      <div class="bar">
-        <frame-component type="bar" id="monsterhp">
-          <div :style="{ height: '100%', width: (monsterHp / monsterMaxHp * 100) + '%', background: '#240D0B' }" />
+      <div class="bar bar-col">
+        <frame-component type="bar" id="playerhp">
+          <div :style="{ height: '100%', width: (playerHp / playerMaxHp * 100) + '%', background: '#240D0B' }" />
         </frame-component>
+        <frame-component type="bar" id="playermana">
+          <div :style="{ height: '100%', width: (playerMana / playerMaxMana * 100) + '%', background: '#0B0D24' }" />
+        </frame-component>
+        <div class="skills-deck">
+          <div v-for="skillId in skillQueue" :key="skillId" class="skill-card"
+            :class="{ 'on-cooldown': isSkillOnCooldown(skillId) }" @click="paused && openSkillInfo(skillId)">
+            <img :src="getSkillIcon(skillId)" :alt="'Skill ' + skillId" />
+            <div v-if="isSkillOnCooldown(skillId)" class="cooldown-overlay">
+              <span>{{ getSkillCooldown(skillId) }}</span>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="clock">
         <frame-component type="game-timer">
@@ -16,11 +28,8 @@
         </frame-component>
       </div>
       <div class="bar bar-col">
-        <frame-component type="bar" id="playerhp">
-          <div :style="{ height: '100%', width: (playerHp / playerMaxHp * 100) + '%', background: '#240D0B' }" />
-        </frame-component>
-        <frame-component type="bar" id="playermana">
-          <div :style="{ height: '100%', width: (playerMana / playerMaxMana * 100) + '%', background: '#0B0D24' }" />
+        <frame-component type="bar" id="monsterhp">
+          <div :style="{ height: '100%', width: (monsterHp / monsterMaxHp * 100) + '%', background: '#240D0B' }" />
         </frame-component>
       </div>
     </div>
@@ -29,15 +38,7 @@
         <div class="fr left">
           <frame-component type="game-small-horizontal">
             <div style="width: 100%; height: 100%" class="content">
-              <div class="skills-deck">
-                <div v-for="skillId in skillQueue" :key="skillId" class="skill-card"
-                  :class="{ 'on-cooldown': isSkillOnCooldown(skillId) }" @click="paused && openSkillInfo(skillId)">
-                  <img :src="getSkillIcon(skillId)" :alt="'Skill ' + skillId" />
-                  <div v-if="isSkillOnCooldown(skillId)" class="cooldown-overlay">
-                    <span>{{ getSkillCooldown(skillId) }}</span>
-                  </div>
-                </div>
-              </div>
+              ...
             </div>
           </frame-component>
         </div>
@@ -91,14 +92,20 @@
     </div>
   </div>
   <modal-component :open="exited" @will-dismiss="handleBack">
-    <frame-component style="width: 50svw !important; overflow: hidden;">
+    <frame-component type="generic-big-squared-rounded" style="width: 35svw !important; overflow: hidden;">
       <div class="stats-modal">
-        <div class="stats-header">Statistic</div>
-        <div class="stats-datetime">
-          <span>{{ formattedDate }}</span>
+        <div class="stats-header-row">
+          <div class="stats-header">Statistic</div>
+          <div class="stats-datetime">
+            <div>{{ formattedDate }}</div>
+            <div>{{ formattedTime2 }}</div>
+          </div>
         </div>
         <div class="stats-section">
-          <div class="section-title">Session info</div>
+          <div class="stats-row">
+            <span class="section-title">Session info</span>
+            <span class="value">Game {{ gameResult?.game_id || 'N/A' }}</span>
+          </div>
           <div class="stats-row">
             <span class="label">Word</span>
             <span class="value">{{ Math.floor(typedText.length / 5) }}</span>
@@ -147,6 +154,7 @@
           </div>
         </div>
         <div class="stats-footer">
+          <button class="back-button" @click="handleBack">Back</button>
         </div>
       </div>
     </frame-component>
@@ -292,7 +300,7 @@
     }
 
     .active {
-      padding-top: min(18vh, 194px);
+      padding-top: min(12vh, 194px);
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
@@ -390,7 +398,7 @@
     }
 
     .char {
-      height: min(70vh, 756px);
+      max-width: 30svw;
       position: absolute;
       top: min(-5vh, -54px);
       left: 50%;
@@ -559,47 +567,25 @@
   flex-wrap: wrap;
   gap: $spacing-sm;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
   height: 100%;
-  padding: $spacing-sm;
+  margin-left: 1rem;
   overflow-y: auto;
   max-height: 100%;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 3px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: rgba($color-gold-primary, 0.3);
-    border-radius: 3px;
-
-    &:hover {
-      background: rgba($color-gold-primary, 0.5);
-    }
-  }
 
   .skill-card {
     width: 2rem;
     height: 2rem;
-    background: linear-gradient(135deg, $color-brown-medium 0%, $color-brown-dark 100%);
-    border: 3px solid $color-gold-primary;
-    border-radius: 50%;
     position: relative;
     overflow: hidden;
-    box-shadow: $shadow-md;
     transition: all $transition-base;
     cursor: pointer;
     flex-shrink: 0;
 
     &:hover {
       transform: scale(1.1);
-      box-shadow: $shadow-lg, $glow-gold-md;
+      box-shadow: $shadow-sm, $glow-gold-md;
     }
 
     img {
@@ -629,7 +615,6 @@
       display: none;
       align-items: center;
       justify-content: center;
-      border-radius: 50%;
 
       span {
         font-size: $font-size-2xl;
@@ -643,12 +628,19 @@
 
 .stats-modal {
   background: $color-bg-base;
-  padding: $spacing-sm $spacing-sm 1rem $spacing-sm;
-  width: calc(100% - 2 * $spacing-sm) !important;
+  padding: 2rem;
+  width: calc(100% - 2 * 2rem) !important;
   display: flex;
   gap: $spacing-sm;
   flex-direction: column;
   color: $color-text-primary;
+
+  .stats-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: $spacing-xs;
+  }
 
   .stats-header {
     font-size: $font-size-2xl;
@@ -659,10 +651,18 @@
   }
 
   .stats-datetime {
-    font-size: $font-size-sm;
     color: $color-text-disabled;
     text-align: right;
-    white-space: pre-line;
+    font-family: $font-family-primary;
+
+    div {
+      line-height: 1.4;
+    }
+  }
+
+  .stats-game-id {
+    color: $color-text-disabled;
+    text-align: right;
     font-family: $font-family-primary;
     margin-bottom: $spacing-sm;
   }
@@ -670,10 +670,8 @@
   .stats-section {
     display: flex;
     flex-direction: column;
-    gap: $spacing-xs;
 
     .section-title {
-      font-size: $font-size-base;
       color: $color-text-primary;
       font-family: $font-family-primary;
       margin-bottom: $spacing-xs;
@@ -686,12 +684,10 @@
       font-family: $font-family-primary;
 
       .label {
-        font-size: $font-size-sm;
         color: $color-text-disabled;
       }
 
       .value {
-        font-size: $font-size-sm;
         color: $color-text-primary;
         text-align: right;
       }
@@ -705,13 +701,14 @@
     margin-top: auto;
 
     .back-button {
-      padding: $spacing-sm $spacing-lg;
+      position: absolute;
+      bottom: 1rem;
+      right: 1.25rem;
       font-size: $font-size-base;
       color: $color-text-primary;
       font-weight: $font-weight-normal;
       background: transparent;
-      border: 1px solid $color-text-disabled;
-      border-radius: $radius-sm;
+      border: none;
       cursor: pointer;
       transition: all $transition-base;
       font-family: $font-family-primary;
@@ -733,6 +730,7 @@ import { useCharacterStore } from '@/stores/character'
 import { useGameStore } from '@/stores/game'
 import FrameComponent from "@/components/game/FrameComponent.vue"
 import ModalComponent from "@/components/ModalComponent.vue"
+import { Howl } from 'howler'
 import skill1 from '@/assets/images/skillsicons/ (1).png'
 import skill2 from '@/assets/images/skillsicons/ (2).png'
 import skill3 from '@/assets/images/skillsicons/ (3).png'
@@ -767,8 +765,8 @@ import skill31 from '@/assets/images/skillsicons/ (31).png'
 import skill32 from '@/assets/images/skillsicons/ (32).png'
 import skill33 from '@/assets/images/skillsicons/ (33).png'
 import skill34 from '@/assets/images/skillsicons/ (34).png'
-const API_BASE_URL = 'http://147.45.253.24:5035/';
-const BASE_URL = API_BASE_URL.replace('/api/v1', '');
+import { API_BASE_URL } from '@/api/client'
+const BASE_URL = API_BASE_URL;
 const skillIcons = {
   1: skill1, 2: skill2, 3: skill3, 4: skill4, 5: skill5,
   6: skill6, 7: skill7, 8: skill8, 9: skill9, 10: skill10,
@@ -819,7 +817,7 @@ export default {
       playerMaxMana: 100,
       monsterHp: 160,
       monsterMaxHp: 160,
-      monsterLevel: 10,
+      monsterLevel: 5,
       monsterPhoto: null,
       monsterStats: {
         damage: 23.81,
@@ -895,7 +893,11 @@ export default {
         blockChance: 0.1,
         defense: 5,
         agility: 10,
-      }
+      },
+      soundPack: null,
+      soundVolume: 50,
+      soundEnabled: true,
+      gameSessionId: null
     }
   },
   setup() {
@@ -909,6 +911,7 @@ export default {
     this.timeRemaining = this.gameTime * 60
     this.startTimer()
     this.sessionStartTime = Date.now()
+    this.gameSessionId = Math.floor(Math.random() * 90000000) + 10000000
     if (!this.characterStore.character) {
       try {
         await this.characterStore.fetchCharacter()
@@ -929,7 +932,7 @@ export default {
       this.baseStats.defense = char.defence || 5
       this.baseStats.agility = char.agility || 10
       if (char.special_enum_ids && char.special_enum_ids.length > 0) {
-        this.activeSkills = [...char.special_enum_ids, 1, 3, 4, 5]
+        this.activeSkills = Array.from(new Set(char.special_enum_ids))
         this.skillQueue = [...this.activeSkills]
       }
     }
@@ -947,6 +950,7 @@ export default {
     }
     window.addEventListener('keydown', this.handleKeyPress)
     this.calculateCharWidth()
+    await this.loadSoundPack()
   },
   beforeUnmount() {
     window.removeEventListener('keydown', this.handleKeyPress)
@@ -969,8 +973,14 @@ export default {
       const dayName = days[now.getDay()]
       const hours = String(now.getHours()).padStart(2, '0')
       const minutes = String(now.getMinutes()).padStart(2, '0')
+      return `${day}.${month}.${year} - ${dayName} ${hours}:${minutes}`
+    },
+    formattedTime2() {
+      const now = new Date()
+      const hours = String(now.getHours()).padStart(2, '0')
+      const minutes = String(now.getMinutes()).padStart(2, '0')
       const seconds = String(now.getSeconds()).padStart(2, '0')
-      return `${day}.${month}.${year} - ${dayName} ${hours}:${minutes} ${hours}:${minutes}:${seconds}`
+      return `${hours}:${minutes}:${seconds}`
     },
     monsterImageUrl() {
       return `${BASE_URL}/${this.monsterPhoto}`
@@ -1003,11 +1013,13 @@ export default {
       this.correctChars = 0
       this.totalChars = 0
       this.startTime = null
+      this.skillQueue = [...this.activeSkills]
+      this.skillCooldowns = {}
       this.calculateCharWidth()
     },
     async spawnMonster() {
       try {
-        const monster = await this.gameStore.generateMonster(this.monsterLevel)
+        const monster = await this.gameStore.generateMonster(this.monsterLevel + Math.floor(this.characterStore.character.lvl / 5))
         this.monsterStats = {
           damage: monster.damage || 20,
           error_attack: monster.error_attack || 0.05,
@@ -1058,6 +1070,10 @@ export default {
         return
       }
       if (this.paused) return
+      const keyCode = this.getKeyCode(e)
+      if (keyCode) {
+        this.playKeySound(keyCode)
+      }
       if (e.key.length > 1 && e.key !== 'Backspace') return
       if (e.key === 'Backspace') {
         this.typedText = this.typedText.slice(0, -1)
@@ -1443,6 +1459,76 @@ export default {
       }
       this.skillQueue = [...this.activeSkills]
       this.skillCooldowns = {}
+    },
+    async loadSoundPack() {
+      try {
+        const configResponse = await fetch('/src/assets/sounds/config.json')
+        const packData = await configResponse.json()
+        const keyDefineType = packData.key_define_type
+        const soundFile = packData.sound
+        const defines = packData.defines
+        if (keyDefineType === 'single') {
+          const soundPath = `/src/assets/sounds/${soundFile}`
+          const sound = new Howl({
+            src: [soundPath],
+            sprite: defines,
+            volume: this.soundVolume / 100
+          })
+          this.soundPack = {
+            ...packData,
+            sound: sound
+          }
+          console.log('Sound pack loaded successfully')
+        } else {
+          const soundData = {}
+          for (const kc in defines) {
+            if (defines[kc]) {
+              const soundPath = `/src/assets/sounds/${defines[kc]}`
+              soundData[kc] = new Howl({
+                src: [soundPath],
+                volume: this.soundVolume / 100
+              })
+            }
+          }
+          this.soundPack = {
+            ...packData,
+            sound: soundData
+          }
+          console.log('Sound pack loaded successfully')
+        }
+      } catch (error) {
+        console.error('Failed to load sound pack:', error)
+      }
+    },
+    playKeySound(keyCode) {
+      if (!this.soundEnabled || !this.soundPack) return
+      const playType = this.soundPack.key_define_type || 'single'
+      const sound = playType === 'single' ? this.soundPack.sound : this.soundPack.sound[keyCode]
+      if (!sound) return
+      sound.volume(this.soundVolume / 100)
+      if (playType === 'single') {
+        sound.play(keyCode)
+      } else {
+        sound.play()
+      }
+    },
+    getKeyCode(e) {
+      const keyMap = {
+        'Digit1': '1', 'Digit2': '2', 'Digit3': '3', 'Digit4': '4', 'Digit5': '5',
+        'Digit6': '6', 'Digit7': '7', 'Digit8': '8', 'Digit9': '9', 'Digit0': '10',
+        'Minus': '11', 'Equal': '12', 'Backspace': '13',
+        'KeyQ': '14', 'KeyW': '15', 'KeyE': '16', 'KeyR': '17', 'KeyT': '18',
+        'KeyY': '19', 'KeyU': '20', 'KeyI': '21', 'KeyO': '22', 'KeyP': '23',
+        'BracketLeft': '24', 'BracketRight': '25', 'Backslash': '26',
+        'KeyA': '27', 'KeyS': '28', 'KeyD': '29', 'KeyF': '30', 'KeyG': '31',
+        'KeyH': '32', 'KeyJ': '33', 'KeyK': '34', 'KeyL': '35', 'Semicolon': '36',
+        'Quote': '37', 'Enter': '38',
+        'ShiftLeft': '39', 'KeyZ': '40', 'KeyX': '41', 'KeyC': '42', 'KeyV': '43',
+        'KeyB': '44', 'KeyN': '45', 'KeyM': '46', 'Comma': '47', 'Period': '48',
+        'Slash': '49', 'ShiftRight': '50',
+        'Space': '51'
+      }
+      return keyMap[e.code] || null
     },
   }
 }

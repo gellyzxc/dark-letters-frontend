@@ -57,8 +57,8 @@
     width: 100svw;
 
     .game {
-      width: calc(100% - #{$spacing-xl});
-      padding: $spacing-md;
+      width: calc(100%);
+      gap: $spacing-sm;
       background-color: $color-bg-base;
       display: flex;
       flex-direction: row;
@@ -67,14 +67,16 @@
       transition: all $transition-base;
       cursor: pointer;
 
-      &:hover {
-        box-shadow: $shadow-md, $glow-gold-sm;
-      }
-
       span {
-        width: 50%;
+        font-weight: 400;
+        font-style: Regular;
+        font-size: 1.8rem;
+        line-height: 100%;
+        letter-spacing: 0%;
+        text-align: center;
+
+        width: 40%;
         font-weight: $font-weight-normal;
-        font-size: $font-size-2xl;
         line-height: $line-height-tight;
         text-align: center;
         color: $color-text-primary;
@@ -107,17 +109,11 @@
     font-weight: $font-weight-bold;
     padding: $spacing-sm $spacing-md;
     border-radius: $radius-base;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid white;
     transition: all $transition-base;
-    font-family: $font-family-display;
     letter-spacing: 0.1em;
-    box-shadow: $glow-gold-sm;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.2);
-      box-shadow: $glow-gold-md, $glow-gold-lg;
-      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.1);
     }
 
     &:active {

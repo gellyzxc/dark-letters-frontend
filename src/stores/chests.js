@@ -16,7 +16,7 @@ export const useChestsStore = defineStore('chests', {
             this.loading = true
             this.error = null
             try {
-                const response = await apiClient.get('/chest')
+                const response = await apiClient.get('/chest/')
                 this.chests = response.data
                 this.loading = false
                 return response.data
