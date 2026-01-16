@@ -11,7 +11,7 @@
       <div v-if="showReforgedTooltip && reforgedItem" class="item-tooltip reforged-tooltip"
         :style="reforgedTooltipPosition">
         <frame-component class="tooltip-frame">
-          <item-info-card :item="reforgedItem" variant="tooltip" :show-header="true">
+          <item-info-card reforge :item="reforgedItem" variant="tooltip" :show-header="true">
             <template #header-extra>
               <div class="reforge-info" style="position: absolute; bottom: 12px;">
                 <div class="gold-info">Gold: {{ character ? character.gold : 0 }}</div>

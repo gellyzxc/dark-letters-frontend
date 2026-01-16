@@ -3,14 +3,95 @@
     <div class="main">
       <img src="@/assets/images/background/blackmarket.png" />
       <div class="chests">
-        <div class="crate" @click="openCrate('legendary')">
-          <img src="@/assets/images/crates/legendary.png" />
+        <div class="crate-container" @mouseenter="showCrateTooltip('legendary')" @mouseleave="hideCrateTooltip()">
+          <div class="crate" @click="openCrate('legendary')">
+            <img src="@/assets/images/crates/legendary.png" />
+          </div>
+          <div class="crate-hover-modal" v-if="tooltipCrateType === 'legendary' && hoveredCrate">
+            <frame-component type="generic-big-squared-rounded" class="item-frame" style="width: 35svw !important;">
+              <div class="crate-info-card">
+                <div class="crate-header">
+                  <div class="crate-name">{{ hoveredCrate.name }} <span style="color: #7B7B7B">{{ hoveredCrate.description }}</span></div>
+                  <div class="crate-description"></div>
+                  <div class="items-count">Items count {{ hoveredCrate.drop_probabilities.items_count.min }}-{{ hoveredCrate.drop_probabilities.items_count.max }}</div>
+                </div>
+                <div class="probabilities-section">
+                  <div class="section-title">Avaliable drops</div>
+                  <div class="drop-list">
+                    <div class="drop-item" v-if="hoveredCrate.drop_probabilities.drops.artifacts.length > 0">
+                      <span class="drop-name">+ artifacts {{ getTotalArtifactChance(hoveredCrate.drop_probabilities.drops.artifacts) }}%</span>
+                    </div>
+                    <div class="drop-item">
+                      <span class="drop-name">+ gold {{ hoveredCrate.drop_probabilities.drops.gold.chance }}%</span>
+                    </div>
+                    <div class="drop-item" v-for="(itemType, typeName) in hoveredCrate.drop_probabilities.drops.items" :key="typeName">
+                      <span class="drop-name">+ {{ typeName }} {{ itemType.total_chance }}%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </frame-component>
+          </div>
         </div>
-        <div class="crate" @click="openCrate('mystical')">
-          <img src="@/assets/images/crates/mystical.png" />
+        <div class="crate-container" @mouseenter="showCrateTooltip('mystical')" @mouseleave="hideCrateTooltip()">
+          <div class="crate" @click="openCrate('mystical')">
+            <img src="@/assets/images/crates/mystical.png" />
+          </div>
+          <div class="crate-hover-modal" v-if="tooltipCrateType === 'mystical' && hoveredCrate">
+            <frame-component type="generic-big-squared-rounded" class="item-frame" style="width: 35svw !important;">
+              <div class="crate-info-card">
+                <div class="crate-header">
+                  <div class="crate-name">{{ hoveredCrate.name }} <span style="color: #7B7B7B">{{ hoveredCrate.description }}</span></div>
+                  <div class="crate-description"></div>
+                  <div class="items-count">Items count {{ hoveredCrate.drop_probabilities.items_count.min }}-{{ hoveredCrate.drop_probabilities.items_count.max }}</div>
+                </div>
+                <div class="probabilities-section">
+                  <div class="section-title">Avaliable drops</div>
+                  <div class="drop-list">
+                    <div class="drop-item" v-if="hoveredCrate.drop_probabilities.drops.artifacts.length > 0">
+                      <span class="drop-name">+ artifacts {{ getTotalArtifactChance(hoveredCrate.drop_probabilities.drops.artifacts) }}%</span>
+                    </div>
+                    <div class="drop-item">
+                      <span class="drop-name">+ gold {{ hoveredCrate.drop_probabilities.drops.gold.chance }}%</span>
+                    </div>
+                    <div class="drop-item" v-for="(itemType, typeName) in hoveredCrate.drop_probabilities.drops.items" :key="typeName">
+                      <span class="drop-name">+ {{ typeName }} {{ itemType.total_chance }}%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </frame-component>
+          </div>
         </div>
-        <div class="crate" @click="openCrate('wooden')">
-          <img src="@/assets/images/crates/wooden.png" />
+        <div class="crate-container" @mouseenter="showCrateTooltip('wooden')" @mouseleave="hideCrateTooltip()">
+          <div class="crate" @click="openCrate('wooden')">
+            <img src="@/assets/images/crates/wooden.png" />
+          </div>
+          <div class="crate-hover-modal" v-if="tooltipCrateType === 'wooden' && hoveredCrate">
+            <frame-component type="generic-big-squared-rounded" class="item-frame" style="width: 35svw !important;">
+              <div class="crate-info-card">
+                <div class="crate-header">
+                  <div class="crate-name">{{ hoveredCrate.name }} <span style="color: #7B7B7B">{{ hoveredCrate.description }}</span></div>
+                  <div class="crate-description"></div>
+                  <div class="items-count">Items count {{ hoveredCrate.drop_probabilities.items_count.min }}-{{ hoveredCrate.drop_probabilities.items_count.max }}</div>
+                </div>
+                <div class="probabilities-section">
+                  <div class="section-title">Avaliable drops</div>
+                  <div class="drop-list">
+                    <div class="drop-item" v-if="hoveredCrate.drop_probabilities.drops.artifacts.length > 0">
+                      <span class="drop-name">+ artifacts {{ getTotalArtifactChance(hoveredCrate.drop_probabilities.drops.artifacts) }}%</span>
+                    </div>
+                    <div class="drop-item">
+                      <span class="drop-name">+ gold {{ hoveredCrate.drop_probabilities.drops.gold.chance }}%</span>
+                    </div>
+                    <div class="drop-item" v-for="(itemType, typeName) in hoveredCrate.drop_probabilities.drops.items" :key="typeName">
+                      <span class="drop-name">+ {{ typeName }} {{ itemType.total_chance }}%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </frame-component>
+          </div>
         </div>
       </div>
     </div>
@@ -41,20 +122,32 @@
             </div>
           </div>
         </div>
+        <div class="crate-price">Price {{ selectedCrate.price }} gold</div>
         <div class="item-price-block" @click="purchaseItem">
-          <span class="item-price">{{ selectedCrate.price }} gold</span>
+          <span class="item-price">Buy</span>
         </div>
       </div>
     </frame-component>
   </modal-component>
-  <modal-component :open="showRewardModal" @will-dismiss="showRewardModal = false">
+  <modal-component :open="showRewardModal" @will-dismiss="closeRewardModal">
     <div class="item-drop-animation" @click.stop>
       <div class="particles">
         <div v-for="i in 20" :key="i" class="particle" :style="getParticleStyle(i)"></div>
       </div>
       <frame-component type="generic-card-horizontal" class="item-frame">
-        <item-info-card v-if="selectedItem" :item="selectedItem" variant="tooltip" :show-icon="true"
+        <item-info-card v-if="selectedItem" :item="selectedItem" :itemType="selectedItem.itemType" variant="reward" :show-icon="true"
           :show-glow="true" />
+        <div class="reward-navigation-inline" v-if="rewardItems.length > 1">
+          <div class="nav-buttons">
+            <div class="nav-button" :class="{ 'disabled': currentRewardIndex === 0 }" @click="prevReward">
+              <span>Prev</span>
+            </div>
+            <span>/</span>
+            <div class="nav-button" :class="{ 'disabled': currentRewardIndex >= rewardItems.length - 1 }" @click="nextReward">
+              <span>Next</span>
+            </div>
+          </div>
+        </div>
       </frame-component>
     </div>
   </modal-component>
@@ -89,22 +182,40 @@
       left: 50%;
       transform: translateX(-50%);
 
-      .crate {
+      .crate-container {
         position: relative;
-        cursor: pointer;
-        transition: transform $transition-base;
 
-        &:hover {
-          transform: translateY(-8px);
+        .crate {
+          position: relative;
+          cursor: pointer;
+          transition: transform $transition-base;
+
+          &:hover {
+            transform: translateY(-8px);
+          }
+
+          &:active {
+            transform: translateY(0) scale(0.95);
+          }
+
+          img {
+            width: calc(80svw / 3 - 10svw);
+            transition: all $transition-base;
+          }
         }
 
-        &:active {
-          transform: translateY(0) scale(0.95);
-        }
+        .crate-hover-modal {
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%) translateY(-20px);
+          z-index: 100;
+          animation: tooltipAppear 0.2s ease-out;
+          pointer-events: none;
 
-        img {
-          width: calc(80svw / 3 - 10svw);
-          transition: all $transition-base;
+          .item-frame {
+            pointer-events: auto;
+          }
         }
       }
     }
@@ -178,6 +289,15 @@
         }
       }
     }
+  }
+
+  .crate-price {
+    position: absolute;
+    left: 2rem;
+    bottom: 2rem;
+    font-size: $font-size-2xl;
+    color: white;
+    font-family: $font-family-primary;
   }
 
   .item-price-block {
@@ -465,6 +585,55 @@
     transform: scale(1.05);
   }
 }
+
+@keyframes tooltipAppear {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-12px);
+  }
+}
+
+.reward-navigation-inline {
+  position: absolute;
+  bottom: 1rem;
+  left: 5.5rem;
+  font-size: 1.4rem;
+  display: flex;
+  height: unset !important;
+  width: unset !important;
+  
+  .nav-buttons {
+    display: flex;
+  }
+  
+  .nav-button {
+    cursor: pointer;
+    transition: all $transition-base;
+    
+    span {
+      color: white;
+      font-family: $font-family-primary;
+      transition: color $transition-base;
+    }
+
+    &.disabled {
+      cursor: not-allowed;
+      
+      span {
+        color: #464040;
+      }
+    }
+
+    &:not(.disabled):active {
+      transform: scale(0.95);
+    }
+  }
+}
 </style>
 <script>
 import FrameComponent from "@/components/game/FrameComponent.vue";
@@ -482,10 +651,15 @@ export default {
       showPreviewModal: false,
       showRewardModal: false,
       selectedItem: null,
+      rewardItems: [],
+      currentRewardIndex: 0,
       currentCrateType: null,
       selectedCrate: null,
+      hoveredCrate: null,
+      tooltipCrateType: null,
       chests: [],
-      chestTypeMap: {}
+      chestTypeMap: {},
+      chestInfoCache: {}
     }
   },
   computed: {
@@ -527,6 +701,8 @@ export default {
       }
     },
     async openCrate(crateType) {
+      this.hoveredCrate = null;
+      this.tooltipCrateType = null;
       if (this.showPreviewModal || this.showRewardModal) return;
       try {
         const chestId = Object.keys(this.chestTypeMap).find(id => this.chestTypeMap[id] === crateType);
@@ -535,8 +711,16 @@ export default {
           return;
         }
         this.currentCrateType = crateType;
-        const chestInfo = await this.chestsStore.fetchChestProbabilities(chestId);
-        this.selectedCrate = chestInfo;
+        
+        // Проверяем кеш
+        if (this.chestInfoCache[chestId]) {
+          this.selectedCrate = this.chestInfoCache[chestId];
+        } else {
+          const chestInfo = await this.chestsStore.fetchChestProbabilities(chestId);
+          this.chestInfoCache[chestId] = chestInfo; // Сохраняем в кеш
+          this.selectedCrate = chestInfo;
+        }
+        
         this.showPreviewModal = true;
       } catch (error) {
         console.error('Failed to load chest info:', error);
@@ -564,44 +748,67 @@ export default {
         const chestId = this.selectedCrate.id;
         const result = await this.chestsStore.openChest(chestId);
         console.log('Chest opened:', result);
-        if (result.items && result.items.length > 0) {
-          const apiItem = result.items[0];
-          this.selectedItem = {
-            id: apiItem.id,
-            name: apiItem.name,
-            description: apiItem.description,
-            photo: apiItem.photo,
-            price: apiItem.price,
-            type: apiItem.item_type,
-            tier: apiItem.tier,
-            stats: apiItem.stats?.map(stat => ({
-              label: stat.visual_text.split(' to ')[1] || stat.visual_text,
-              value: stat.visual_text.split(' to ')[0] || stat.visual_text
-            })) || [],
-            rarity: this.getRarityFromType(apiItem.item_type)
-          };
-        } else if (result.gold && result.gold > 0) {
-          this.selectedItem = {
+        
+        this.rewardItems = [];
+        this.currentRewardIndex = 0;
+        
+        // Добавляем золото если есть
+        if (result.gold && result.gold > 0) {
+          this.rewardItems.push({
             icon: '💰',
-            name: 'Золото',
-            description: `Вы получили ${result.gold} золота`,
+            name: 'Gold',
+            description: `You received ${result.gold} gold`,
             stats: [],
-            rarity: 'common'
-          };
-        } else if (result.artifacts && result.artifacts.length > 0) {
-          const artifact = result.artifacts[0];
-          this.selectedItem = {
-            name: artifact.name || 'Артефакт',
-            description: artifact.description || 'Редкий артефакт',
-            stats: [],
-            rarity: 'legendary'
-          };
+            rarity: 'common',
+            itemType: 'gold'
+          });
         }
+        
+        // Добавляем все предметы
+        if (result.items && result.items.length > 0) {
+          result.items.forEach(apiItem => {
+            this.rewardItems.push({
+              id: apiItem.id,
+              name: apiItem.name,
+              description: apiItem.description,
+              photo: apiItem.photo,
+              price: apiItem.price,
+              type: apiItem.item_type,
+              tier: apiItem.tier,
+              stats: apiItem.stats?.map(stat => ({
+                label: stat.visual_text,
+                value: stat.visual_text.split(' to ')[0] || stat.visual_text
+              })) || [],
+              rarity: this.getRarityFromType(apiItem.item_type),
+              itemType: 'item'
+            });
+          });
+        }
+        
+        // Добавляем артефакты если есть
+        if (result.artifacts && result.artifacts.length > 0) {
+          result.artifacts.forEach(artifact => {
+            this.rewardItems.push({
+              name: artifact.name || 'Artifact',
+              description: artifact.description || 'Rare artifact',
+              photo: artifact.photo,
+              value: artifact.value,
+              itemType: 'artifact'
+            });
+          });
+        }
+        
+        // Показываем первую награду
+        if (this.rewardItems.length > 0) {
+          this.selectedItem = this.rewardItems[0];
+        }
+        
         this.showPreviewModal = false;
         setTimeout(() => {
           this.showRewardModal = true;
         }, 300);
       } catch (error) {
+        this.$toast.show(error.response.data.error)
         console.error('Failed to open chest:', error);
         this.showPreviewModal = false;
       }
@@ -618,6 +825,48 @@ export default {
         left: '50%',
         top: '50%',
       };
+    },
+    async showCrateTooltip(crateType) {
+      try {
+        const chestId = Object.keys(this.chestTypeMap).find(id => this.chestTypeMap[id] === crateType);
+        if (!chestId) return;
+        
+        // Проверяем кеш
+        if (this.chestInfoCache[chestId]) {
+          this.hoveredCrate = this.chestInfoCache[chestId];
+          this.tooltipCrateType = crateType;
+          return;
+        }
+        
+        const chestInfo = await this.chestsStore.fetchChestProbabilities(chestId);
+        this.chestInfoCache[chestId] = chestInfo; // Сохраняем в кеш
+        this.hoveredCrate = chestInfo;
+        this.tooltipCrateType = crateType;
+      } catch (error) {
+        console.error('Failed to load chest info for tooltip:', error);
+      }
+    },
+    hideCrateTooltip() {
+      this.hoveredCrate = null;
+      this.tooltipCrateType = null;
+    },
+    nextReward() {
+      if (this.currentRewardIndex < this.rewardItems.length - 1) {
+        this.currentRewardIndex++;
+        this.selectedItem = this.rewardItems[this.currentRewardIndex];
+      }
+    },
+    prevReward() {
+      if (this.currentRewardIndex > 0) {
+        this.currentRewardIndex--;
+        this.selectedItem = this.rewardItems[this.currentRewardIndex];
+      }
+    },
+    closeRewardModal() {
+      this.showRewardModal = false;
+      this.currentRewardIndex = 0;
+      this.rewardItems = [];
+      this.selectedItem = null;
     }
   },
   async mounted() {

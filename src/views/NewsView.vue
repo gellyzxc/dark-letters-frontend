@@ -67,7 +67,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: $spacing-md;
-    width: 100svw;
+    width: calc(100svw - 2rem);
 
     .news {
       background-color: $color-bg-base;
@@ -135,8 +135,9 @@
 }
 
 .game-modal {
-  padding: 1.5rem $spacing-xl 0 $spacing-xl;
+  padding: 1.5rem $spacing-xl 3rem $spacing-xl;
   width: calc(100% - 4rem) !important;
+  height: calc(100% - 4.5rem) !important;
 
   background-color: $color-bg-base;
   position: relative;

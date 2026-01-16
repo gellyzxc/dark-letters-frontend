@@ -725,8 +725,7 @@ export default {
           };
         });
       } catch (error) {
-        console.error('Failed to reroll shop:', error);
-        alert('Failed to reroll shop. Please try again.');
+        this.$toast.show(error.response.data.error)
       }
     },
     async loadShopItems() {
@@ -763,8 +762,9 @@ export default {
           await this.loadShopItems();
         }, 3000);
       } catch (error) {
+        this.showPreviewModal = false;
         console.error('Failed to purchase item:', error);
-        alert('Failed to purchase item. Please try again.');
+        this.$toast.show(error.response.data.error)
       }
     },
     async closeRewardModal() {

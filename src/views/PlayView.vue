@@ -25,7 +25,6 @@
             <div class="markdown-content" style="color: #464040; width: 50%;" v-html="renderedDescription"></div>
             <div style="display: flex; flex-direction: column; align-items: flex-end; width: 50%">
               <span style="text-align: right; width: min-content; white-space: nowrap;">Map info</span>
-              <br>
               <div class="markdown-content" style="color: #464040; text-align: right;" v-html="renderedMechanics"></div>
             </div>
           </div>
@@ -62,7 +61,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: $spacing-md;
-    width: 100svw;
+    width: calc(100svw - 2rem);
 
     .game {
       width: calc(100%);
@@ -138,7 +137,7 @@
 
   .text {
     z-index: 100;
-    padding: $spacing-md $spacing-xl 0 $spacing-md;
+    padding: $spacing-md $spacing-xl 0 $spacing-xl;
     display: flex;
     flex-direction: column;
     gap: $spacing-md;

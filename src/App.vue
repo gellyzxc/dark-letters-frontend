@@ -1,8 +1,19 @@
 <template>
   <div class="app-container">
     <router-view />
+    <ToastContainer />
   </div>
 </template>
+
+<script>
+import ToastContainer from '@/components/ToastContainer.vue'
+
+export default {
+  components: {
+    ToastContainer
+  }
+}
+</script>
 
 <style scoped>
 .app-container {

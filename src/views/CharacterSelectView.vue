@@ -495,6 +495,8 @@ export default {
       try {
         const { useCharacterStore } = await import('@/stores/character');
         const characterStore = useCharacterStore();
+        console.clear()
+        console.log(this.selectedCharacter, this.selectedRace)
         const result = await characterStore.createCharacter(this.selectedCharacter.id, this.selectedRace.id);
         console.log('Character created successfully:', result);
       } catch (error) {
