@@ -43,7 +43,7 @@
             @drag-start="onDragStartHandler" @drag-end="onDragEndHandler">
             <div v-if="equippedSword" class="item" @mouseenter="onItemHover(equippedSword, $event)"
               @mouseleave="onItemLeave">
-              <img v-if="equippedSword.photo" :src="getImageUrl(equippedSword.photo)" :alt="equippedSword.name"
+              <img v-if="equippedSword.photo" style="max-height: 182px;" :src="getImageUrl(equippedSword.photo)" :alt="equippedSword.name"
                 class="item-image" />
               <div v-else class="icon">{{ equippedSword.icon || '📦' }}</div>
             </div>
@@ -160,20 +160,20 @@
         padding: 0 0.5rem;
         width: calc(560px - 1rem);
         height: 81px;
-        bottom: 23px;
+        bottom: 19px;
         right: 20px;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
         align-items: flex-start;
-        color: white;
-        font-size: 1.7rem;
+        color: #DFDFDF;
+        font-size: 1.6rem;
 
         .col {
           display: flex;
           flex-direction: column;
           align-items: flex-end;
-          gap: 1rem;
+          gap: 0.9rem;
         }
       }
 
@@ -204,10 +204,10 @@
       }
 
       .sword {
-        top: 175px;
-        left: 37px;
-        height: 176px;
-        width: 76px;
+    top: 181px;
+    left: 43px;
+    height: 176px;
+    width: 76px;
       }
 
       .amulet {
@@ -286,7 +286,7 @@
 
             .sell-text {
               font-size: $font-size-sm;
-              color: $color-text-primary !important;
+              color: #DFDFDF !important;
               text-align: center;
               font-family: $font-family-primary;
               text-transform: uppercase;
@@ -677,7 +677,7 @@ export default {
         top: 0
       };
     },
-    onEquipmentDropped(slotType, { droppedData, currentData }) {
+    async onEquipmentDropped(slotType, { droppedData, currentData }) {
       console.log('Equipment dropped:', { slotType, droppedData, currentData })
       if (!droppedData) return;
       const allowedTypes = {
@@ -697,12 +697,13 @@ export default {
         this.clearItemCells(newInventorySlots, droppedData);
         if (oldEquipped) {
           this.fillItemCells(newInventorySlots, oldEquipped, sourceInvIndex);
-          this.inventoryStore.updateItem(oldEquipped.id, { is_equipped: false });
+          await this.inventoryStore.updateItem(oldEquipped.id, { is_equipped: false });
           this.updateItemPosition(oldEquipped, sourceInvIndex);
         }
         this[slotProp] = droppedData;
         this.inventorySlots = newInventorySlots;
-        this.inventoryStore.updateItem(droppedData.id, { is_equipped: true });
+        await this.inventoryStore.updateItem(droppedData.id, { is_equipped: true });
+        await this.loadCharacter();
       } else {
         const sourceSlots = ['sword', 'cloth', 'amulet'];
         for (const sourceSlot of sourceSlots) {
@@ -711,6 +712,7 @@ export default {
             const temp = this[slotProp];
             this[slotProp] = this[sourceProp];
             this[sourceProp] = temp;
+            await this.loadCharacter();
             break;
           }
         }
@@ -732,7 +734,7 @@ export default {
         await this.loadInventory();
       }
     },
-    onItemDropped(groupName, slotIndex, { droppedData, currentData }) {
+    async onItemDropped(groupName, slotIndex, { droppedData, currentData }) {
       console.log('Inventory dropped:', { groupName, slotIndex, droppedData, currentData })
       if (!droppedData) return;
       if (!this.canPlaceItemAt(droppedData, slotIndex)) {
@@ -761,14 +763,15 @@ export default {
             if (targetItem) {
               this.clearItemCells(newInventorySlots, targetItem);
               this[sourceProp] = targetItem;
-              this.inventoryStore.updateItem(targetItem.id, { is_equipped: true });
+              await this.inventoryStore.updateItem(targetItem.id, { is_equipped: true });
             } else {
               this[sourceProp] = null;
             }
             this.fillItemCells(newInventorySlots, droppedData, slotIndex);
             this.inventorySlots = newInventorySlots;
             this.updateItemPosition(droppedData, slotIndex);
-            this.inventoryStore.updateItem(droppedData.id, { is_equipped: false });
+            await this.inventoryStore.updateItem(droppedData.id, { is_equipped: false });
+            await this.loadCharacter();
             break;
           }
         }

@@ -221,6 +221,7 @@ export default {
           min-height: 300px;
 
           .frame-slot {
+            overflow: hidden;
             height: 100%;
             min-height: 300px;
 
@@ -309,6 +310,7 @@ export default {
 }
 
 .flipped-card-drag {
+  overflow: hidden;
   width: 100%;
   height: 100%;
   background: transparent !important;

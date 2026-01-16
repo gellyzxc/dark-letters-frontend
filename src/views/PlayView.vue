@@ -1,7 +1,7 @@
 <template>
   <div class="page play-view">
     <div class="grid">
-      <frame-component v-for="game in games" class="frame" @click="() => openGameModal(game)">
+      <frame-component v-for="game in games" class="frame" :class="game.name" @click="() => openGameModal(game)">
         <div class="game">
           <span>
             {{ game.description }}
@@ -19,8 +19,16 @@
         <img src="@/assets/images/background/test-game.png" class="top" />
         <div class="text">
           <span>
-            {{ selectedGame?.description }}
+            {{ selectedGame?.name.toUpperCase() }}
           </span>
+          <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start; gap: 0.5rem">
+            <div class="markdown-content" style="color: #464040; width: 50%;" v-html="renderedDescription"></div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; width: 50%">
+              <span style="text-align: right; width: min-content; white-space: nowrap;">Map info</span>
+              <br>
+              <div class="markdown-content" style="color: #464040; text-align: right;" v-html="renderedMechanics"></div>
+            </div>
+          </div>
         </div>
         <span class="start" @click="startGame">
           START
@@ -137,11 +145,59 @@
 
     span {
       width: 100%;
-      font-weight: $font-weight-normal;
-      font-size: $font-size-lg;
+      font-size: 1.3rem;
       color: $color-text-primary;
       line-height: $line-height-normal;
       font-family: $font-family-primary;
+    }
+
+    .markdown-content {
+      font-size: 1.3rem;
+      color: $color-text-primary;
+      line-height: $line-height-normal;
+      font-family: $font-family-primary;
+
+      :deep(h1), :deep(h2), :deep(h3) {
+        margin-top: 0.5rem;
+        margin-bottom: 0.3rem;
+        font-weight: $font-weight-bold;
+      }
+
+      :deep(p) {
+        margin-bottom: 0.3rem;
+      }
+
+      :deep(ul), :deep(ol) {
+        margin-left: 1.5rem;
+        margin-bottom: 0.3rem;
+      }
+
+      :deep(code) {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 0.1rem 0.3rem;
+        border-radius: 0.2rem;
+      }
+
+      :deep(pre) {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 0.5rem;
+        border-radius: 0.3rem;
+        overflow-x: auto;
+        margin-bottom: 0.3rem;
+      }
+
+      :deep(a) {
+        color: #FFD700;
+        text-decoration: underline;
+      }
+
+      :deep(strong) {
+        font-weight: $font-weight-bold;
+      }
+
+      :deep(em) {
+        font-style: italic;
+      }
     }
 
     .game-info {
@@ -180,6 +236,7 @@
 import { useGameStore } from '@/stores/game'
 import FrameComponent from "@/components/game/FrameComponent.vue"
 import ModalComponent from "@/components/ModalComponent.vue"
+import { marked } from 'marked'
 import pic1 from "@/assets/images/background/play/1.png"
 import pic2 from "@/assets/images/background/play/2.png"
 import pic3 from "@/assets/images/background/play/3.png"
@@ -194,10 +251,30 @@ export default {
       selectedGame: null,
       gameImages: {
         'training': pic1,
-        'dungeon': pic2,
-        'story': pic2,
+        'dangeon': pic2,
+        'story': pic3,
         'boss': pic4,
       }
+    }
+  },
+  computed: {
+    renderedDescription() {
+      if (!this.selectedGame?.description) return '';
+      const text = this.selectedGame.description
+        .replace(/\\r\\n/g, '\n')
+        .replace(/\\n/g, '\n')
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n');
+      return marked(text, { breaks: true });
+    },
+    renderedMechanics() {
+      if (!this.selectedGame?.mechanics) return '';
+      const text = this.selectedGame.mechanics
+        .replace(/\\r\\n/g, '\n')
+        .replace(/\\n/g, '\n')
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n');
+      return marked(text, { breaks: true });
     }
   },
   methods: {
@@ -206,7 +283,7 @@ export default {
       this.open = true
     },
     getGameImage(gameName) {
-      return this.gameImages[gameName] || pic1
+      return this.gameImages[gameName]
     },
     startGame() {
       if (this.selectedGame) {
@@ -217,17 +294,11 @@ export default {
   async mounted() {
     try {
       await this.gameStore.fetchGameTypes()
-      const gameOrder = ['training', 'dungeon', 'story', 'boss']
       this.games = this.gameStore.gameTypes
         .map(game => ({
           ...game,
           image: this.getGameImage(game.name)
         }))
-        .sort((a, b) => {
-          const indexA = gameOrder.indexOf(a.name)
-          const indexB = gameOrder.indexOf(b.name)
-          return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB)
-        })
     } catch (error) {
       console.error('Failed to load game types:', error)
     }

@@ -3,7 +3,8 @@
     <div class="grid">
       <frame-component v-for="n in news" class="frame" @click="() => { open = true; openedNews = n }">
         <div class="news">
-          <img src="@/assets/images/cards/news.png" />
+          <img src="@/assets/images/cards/news.png" v-if="n.is_news" />
+          <img src="@/assets/images/cards/patch.png" v-else />
           <div class="data">
             <div class="content">
               <span>{{ n.name }}
@@ -23,13 +24,19 @@
   <modal-component :open="open" @will-dismiss="open = false">
     <frame-component type="generic-big-squared-rounded" style="transform: scale(0.98)">
       <div class="game-modal">
-        <img src="@/assets/images/background/test-game.png" class="top" />
+        <div class="image">
+          <img src="@/assets/images/cards/news.png" v-if="openedNews.is_news" />
+          <img src="@/assets/images/cards/patch.png" v-else />
+        </div>
         <div class="text">
+          <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+            <span>{{ openedNews.is_news ? 'NEWS' : 'PATCH' }}</span>
+            <span>{{ dayjs(openedNews.publication_date).format('DD.MM.YYYY') }}</span>
+          </div>
           <span>
             {{ openedNews.name }}
-            <br />
-            {{ openedNews.description }}
           </span>
+          <div class="description" v-html="renderedDescription"></div>
         </div>
       </div>
     </frame-component>
@@ -128,58 +135,79 @@
 }
 
 .game-modal {
+  padding: 1.5rem $spacing-xl 0 $spacing-xl;
+  width: calc(100% - 4rem) !important;
+
   background-color: $color-bg-base;
   position: relative;
 
-  .start {
-    position: absolute;
-    cursor: pointer;
-    z-index: 100;
-    bottom: $spacing-md;
-    right: $spacing-xl;
-    font-size: $font-size-lg;
-    color: $color-gold-primary;
-    font-weight: $font-weight-bold;
-    padding: $spacing-sm $spacing-md;
-    border-radius: $radius-base;
-    background: rgba($color-gold-primary, 0.1);
-    border: 2px solid $color-gold-primary;
-    transition: all $transition-base;
-    font-family: $font-family-display;
-    letter-spacing: 0.1em;
+  .image {
+    width: fit-content;
+    height: 20rem;
+    float: left;
+    margin-right: 1.5rem;
+    margin-bottom: 1rem;
 
-    &:hover {
-      background: rgba($color-gold-primary, 0.2);
-      box-shadow: $glow-gold-md;
-      transform: translateY(-2px);
+    img {
+      height: 100%;
+      width: auto;
+      display: block;
     }
-
-    &:active {
-      transform: translateY(0) scale(0.98);
-    }
-  }
-
-  img {
-    width: 100%;
-    height: 200px;
-    object-position: top;
-    object-fit: cover;
   }
 
   .text {
+    padding-top: 1rem;
     z-index: 100;
-    padding: $spacing-md $spacing-xl 0 $spacing-md;
-    display: flex;
-    flex-direction: row;
-    gap: $spacing-md;
 
     span {
-      width: 98%;
       font-weight: $font-weight-normal;
       font-size: $font-size-2xl;
       color: $color-text-primary;
       line-height: $line-height-normal;
       font-family: $font-family-primary;
+    }
+
+    .description {
+      margin-top: 1rem;
+      font-weight: $font-weight-normal;
+      font-size: $font-size-2xl;
+      color: $color-text-primary;
+      line-height: $line-height-normal;
+      font-family: $font-family-primary;
+
+      :deep(h1), :deep(h2), :deep(h3) {
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        font-weight: $font-weight-bold;
+      }
+
+      :deep(p) {
+        margin-bottom: 0.5rem;
+      }
+
+      :deep(ul), :deep(ol) {
+        margin-left: 1.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      :deep(code) {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.25rem;
+      }
+
+      :deep(pre) {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        overflow-x: auto;
+        margin-bottom: 0.5rem;
+      }
+
+      :deep(a) {
+        color: #FFD700;
+        text-decoration: underline;
+      }
     }
   }
 }
@@ -190,6 +218,7 @@ import ModalComponent from "@/components/ModalComponent.vue";
 import { useAuthStore } from "@/stores/auth";
 import { useNewsStore } from "@/stores/news";
 import dayjs from "dayjs";
+import { marked } from 'marked';
 export default {
   name: "PlayView",
   components: { ModalComponent, FrameComponent },
@@ -199,6 +228,11 @@ export default {
       news: [],
       openedNews: {},
     };
+  },
+  computed: {
+    renderedDescription() {
+      return this.openedNews.description ? marked(this.openedNews.description) : '';
+    }
   },
   methods: {
     dayjs,

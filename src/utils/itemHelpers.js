@@ -77,24 +77,7 @@ export function transformApiItem(apiItem) {
  * @returns {string} - Отформатированная метка
  */
 function formatStatLabel(stat) {
-  const skillNames = {
-    Defence: 'Defense',
-    AllAttributes: 'All Attributes',
-    Health: 'Health',
-    Mana: 'Mana',
-    Strength: 'Strength',
-    Agility: 'Agility',
-    Intellect: 'Intellect',
-    CritChance: 'Crit Chance',
-    CritDamage: 'Crit Damage',
-    Armor: 'Armor',
-    Damage: 'Damage'
-  }
-  
-  const skillName = skillNames[stat.buff_skill] || stat.buff_skill
-  const typePrefix = stat.buff_type === 'M' ? '+' : '+'
-  
-  return `${typePrefix} ${skillName}`
+  return stat?.visual_text
 }
 
 /**

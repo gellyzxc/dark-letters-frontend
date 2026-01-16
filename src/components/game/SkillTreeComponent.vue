@@ -52,7 +52,7 @@
         <div class="ability-points">
           <span class="points-label">Ability point</span>
           <span class="points-value">{{ characterStats.available_skill_points }}/{{ characterStats.total_skill_points
-            }}</span>
+          }}</span>
         </div>
       </div>
     </frame-component>
@@ -65,6 +65,8 @@ import * as PIXI from 'pixi.js'
 import FrameComponent from '@/components/game/FrameComponent.vue'
 import SkillsBackground from '@/assets/images/background/skills.png'
 import apiClient, { API_BASE_URL } from '@/api/client'
+import { Howl } from 'howler'
+import activateNodeSound from '@/assets/activate_node.mp3'
 import Skill1 from '@/assets/images/skills/1.png'
 import Skill2 from '@/assets/images/skills/2.png'
 import Skill3 from '@/assets/images/skills/3.png'
@@ -118,6 +120,10 @@ const pixiContainer = ref(null)
 const nodesData = ref(null)
 let app = null
 let viewport = null
+const activateSound = new Howl({
+  src: [activateNodeSound],
+  volume: 0.5
+})
 const characterStats = computed(() => ({
   agility: characterStore.character?.agility || 0,
   intellect: characterStore.character?.intellect || 0,
@@ -425,11 +431,60 @@ async function createNode(nodeData, nodesContainer, allEdges, app, tooltipsConta
       return
     }
     const wasActive = nodeData.active
+    if (wasActive && nodeData.uid === 0) {
+      const shake = new PIXI.Graphics()
+      shake.circle(0, 0, outerRadius + 5)
+      shake.stroke({ width: 2, color: 0xff0000, alpha: 0.8 })
+      container.addChild(shake)
+      let shakeTime = 0
+      const shakeTicker = (delta) => {
+        shakeTime += delta.deltaTime
+        shake.alpha = 1 - (shakeTime / 20)
+        if (shakeTime >= 20) {
+          container.removeChild(shake)
+          app.ticker.remove(shakeTicker)
+        }
+      }
+      app.ticker.add(shakeTicker)
+      return
+    }
+    if (wasActive && nodeData.uid !== 0) {
+      const links = allNodesData.links
+      const activeConnections = links.filter(link => {
+        if (link.from === nodeData.uid) {
+          const neighborNode = allNodesData.nodes.find(n => n.uid === link.to)
+          return neighborNode && neighborNode.active
+        }
+        if (link.to === nodeData.uid) {
+          const neighborNode = allNodesData.nodes.find(n => n.uid === link.from)
+          return neighborNode && neighborNode.active
+        }
+        return false
+      })
+      if (activeConnections.length > 1) {
+        const shake = new PIXI.Graphics()
+        shake.circle(0, 0, outerRadius + 5)
+        shake.stroke({ width: 2, color: 0xff6600, alpha: 0.8 })
+        container.addChild(shake)
+        let shakeTime = 0
+        const shakeTicker = (delta) => {
+          shakeTime += delta.deltaTime
+          shake.alpha = 1 - (shakeTime / 20)
+          if (shakeTime >= 20) {
+            container.removeChild(shake)
+            app.ticker.remove(shakeTicker)
+          }
+        }
+        app.ticker.add(shakeTicker)
+        return
+      }
+    }
     try {
       if (wasActive) {
         await characterStore.unallocateSkillPoint(nodeData.uid)
       } else {
         await characterStore.allocateSkillPoint(nodeData.uid)
+        activateSound.play()
       }
       await characterStore.fetchCharacter()
       nodeData.active = !wasActive

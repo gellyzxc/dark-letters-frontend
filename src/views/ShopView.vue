@@ -5,14 +5,18 @@
       <div class="items-col col-1">
         <div class="item" v-for="(item, index) in shopItems.slice(0, 2)" :key="'col1-' + index" @click="openItem(item)">
           <frame-component class="main-frame" type="shop-frame">
-            <img v-if="item.photo" :src="getImageUrl(item.photo)" :alt="item.name" class="shop-item-image" />
+            <div style="height: 100%; width: 100%; display: flex; align-items: center; justify-content: center;">
+              <img v-if="item.photo" :src="getImageUrl(item.photo)" :alt="item.name" class="shop-item-image" />
+            </div>
           </frame-component>
         </div>
       </div>
       <div class="items-col col-2">
         <div class="item" v-for="(item, index) in shopItems.slice(2, 4)" :key="'col2-' + index" @click="openItem(item)">
           <frame-component class="main-frame" type="shop-frame">
-            <img v-if="item.photo" :src="getImageUrl(item.photo)" :alt="item.name" class="shop-item-image" />
+            <div style="height: 100%; width: 100%; display: flex; align-items: center; justify-content: center;">
+              <img v-if="item.photo" :src="getImageUrl(item.photo)" :alt="item.name" class="shop-item-image" />
+            </div>
           </frame-component>
         </div>
       </div>
@@ -161,8 +165,8 @@
         }
 
         .shop-item-image {
-          width: 100%;
-          height: 100%;
+          width: 90%;
+          height: 90%;
           object-fit: contain;
           filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
         }

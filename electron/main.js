@@ -22,7 +22,7 @@ function createWindow() {
     show: false,
     frame: true,
     autoHideMenuBar: true,
-    icon: path.join(__dirname, '../public/icon.png')
+    icon: path.join(__dirname, '../public/logo.png'),
   })
 
   mainWindow.once('ready-to-show', () => {

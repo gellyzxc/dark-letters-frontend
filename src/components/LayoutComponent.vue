@@ -1,5 +1,11 @@
 <template>
   <div class="header">
+    <div class="item logo">
+      <div class="image">
+        <img src="@/assets/logo.png" />
+      </div>
+      <span>Dark Letters v1.0</span>
+    </div>
     <div v-for="item in headerItems" class="item" @click="handleNavigate(item)"
       :class="{ active: item.path === selected }">
       <span>
@@ -29,6 +35,11 @@
 <style scoped lang="scss">
 @use '@/assets/styles/variables' as *;
 
+@font-face {
+  font-family: Logo;
+  src: url('@/assets/matrix.ttf') format('truetype');
+}
+
 .header {
   z-index: 1000;
   height: 4rem;
@@ -43,6 +54,28 @@
   background-color: transparent;
 
   .item {
+
+    &.logo {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      .image {
+        height: 3rem;
+        width: auto;
+
+        img {
+          height: 100%;
+        }
+      }
+
+      span {
+        color: white;
+        font-size: 1.4rem;
+        font-family: Logo;
+      }
+    }
+
     &.tag {
       align-items: center;
 

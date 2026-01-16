@@ -1,5 +1,5 @@
 {
-  "name": "dark-letters",
+  "name": "DarkLetters",
   "version": "1.0.0",
   "description": "Dark Letters - Fantasy Typing RPG Game",
   "author": "Your Name",
@@ -23,6 +23,7 @@
     "axios": "^1.13.2",
     "dayjs": "^1.11.19",
     "howler": "^2.2.4",
+    "marked": "^17.0.1",
     "pinia": "^3.0.3",
     "pixi.js": "^8.14.3",
     "sass-embedded": "^1.93.3",
