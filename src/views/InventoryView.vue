@@ -32,7 +32,7 @@
         <div class="stats-bottom">
           <span v-if="character">{{ character.lvl }} lvl</span>
           <div class="col">
-            <span v-if="character">{{ character.experience }} exp</span>
+            <span v-if="character">{{ character.experience }}/{{ character.required_exp }} exp</span>
             <span v-if="character">{{ character.gold }} gold</span>
           </div>
         </div>

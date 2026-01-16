@@ -56,6 +56,8 @@
   .item {
 
     &.logo {
+      position: fixed;
+      left: 0.2rem;
       display: flex;
       flex-direction: row;
       align-items: center;
