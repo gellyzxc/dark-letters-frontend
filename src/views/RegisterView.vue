@@ -116,7 +116,7 @@ export default {
           this.$router.push('/otp');
         })
         .catch(() => {
-          alert(this.authStore.error)
+          this.$toast.show(this.authStore.error)
         })
     }
   },

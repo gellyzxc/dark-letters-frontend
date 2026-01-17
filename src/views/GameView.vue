@@ -3,14 +3,31 @@
     <div class="header">
       <div class="bar bar-col">
         <frame-component type="bar" id="playerhp">
-          <div :style="{ height: '100%', width: (playerHp / playerMaxHp * 100) + '%', background: '#240D0B' }" />
+          <div
+            :style="{
+              height: '100%',
+              width: (playerHp / playerMaxHp) * 100 + '%',
+              background: '#240D0B',
+            }"
+          />
         </frame-component>
         <frame-component type="bar" id="playermana">
-          <div :style="{ height: '100%', width: (playerMana / playerMaxMana * 100) + '%', background: '#0B0D24' }" />
+          <div
+            :style="{
+              height: '100%',
+              width: (playerMana / playerMaxMana) * 100 + '%',
+              background: '#0B0D24',
+            }"
+          />
         </frame-component>
         <div class="skills-deck">
-          <div v-for="skillId in skillQueue" :key="skillId" class="skill-card"
-            :class="{ 'on-cooldown': isSkillOnCooldown(skillId) }" @click="paused && openSkillInfo(skillId)">
+          <div
+            v-for="skillId in skillQueue"
+            :key="skillId"
+            class="skill-card"
+            :class="{ 'on-cooldown': isSkillOnCooldown(skillId) }"
+            @click="paused && openSkillInfo(skillId)"
+          >
             <img :src="getSkillIcon(skillId)" :alt="'Skill ' + skillId" />
             <div v-if="isSkillOnCooldown(skillId)" class="cooldown-overlay">
               <span>{{ getSkillCooldown(skillId) }}</span>
@@ -21,7 +38,9 @@
       <div class="clock">
         <frame-component type="game-timer">
           <div class="clock-in">
-            <span :style="{ color: timeRemaining < 60 ? '#ff4444' : '#7B7B7B' }">
+            <span
+              :style="{ color: timeRemaining < 60 ? '#ff4444' : '#7B7B7B' }"
+            >
               {{ formattedTime }}
             </span>
           </div>
@@ -29,7 +48,13 @@
       </div>
       <div class="bar bar-col">
         <frame-component type="bar" id="monsterhp">
-          <div :style="{ height: '100%', width: (monsterHp / monsterMaxHp * 100) + '%', background: '#240D0B' }" />
+          <div
+            :style="{
+              height: '100%',
+              width: (monsterHp / monsterMaxHp) * 100 + '%',
+              background: '#240D0B',
+            }"
+          />
         </frame-component>
       </div>
     </div>
@@ -38,35 +63,76 @@
         <div class="fr left">
           <frame-component type="game-small-horizontal">
             <div style="width: 100%; height: 100%" class="content">
-              ...
+              <span style="font-size: 1.7rem">
+                Monster level {{ monsterLevel }}
+              </span>
             </div>
           </frame-component>
         </div>
         <frame-component type="game-big">
           <div class="words-game">
             <div v-if="paused" class="pause">
-              <div v-if="!showExitConfirm" style="display: flex; flex-direction: row; gap: 1rem; padding-bottom: 6rem;">
+              <div
+                v-if="!showExitConfirm"
+                style="
+                  display: flex;
+                  flex-direction: row;
+                  gap: 1rem;
+                  padding-bottom: 6rem;
+                "
+              >
                 <span @click="paused = false">Unpause</span>
                 <span @click="showExitConfirm = true">Exit</span>
               </div>
-              <div v-else
-                style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; width: 100%; height: 100%;">
-                <span style="font-size: 1.3rem; color: #7B7B7B; font-weight: 600;">Are you sure?</span>
-                <div style="display: flex; flex-direction: row; gap: 2rem;">
-                  <span @click="handleExitYes" style="cursor: pointer; color: #ff4444; font-weight: 700;">Yes</span>
-                  <span @click="showExitConfirm = false"
-                    style="cursor: pointer; color: #7B7B7B; font-weight: 700;">No</span>
+              <div
+                v-else
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1.5rem;
+                  width: 100%;
+                  height: 100%;
+                "
+              >
+                <span
+                  style="font-size: 1.3rem; color: #7b7b7b; font-weight: 600"
+                  >Are you sure?</span
+                >
+                <div style="display: flex; flex-direction: row; gap: 2rem">
+                  <span
+                    @click="handleExitYes"
+                    style="cursor: pointer; color: #ff4444; font-weight: 700"
+                    >Yes</span
+                  >
+                  <span
+                    @click="showExitConfirm = false"
+                    style="cursor: pointer; color: #7b7b7b; font-weight: 700"
+                    >No</span
+                  >
                 </div>
               </div>
             </div>
             <div class="words-container">
               <span class="word" ref="word">
-                <span v-for="(char, index) in currentText" :key="index" :class="{
-                  'typed': index < typedText.length,
-                  'error': index < typedText.length && char !== typedText[index]
-                }">{{ char }}</span>
+                <span
+                  v-for="(char, index) in currentText"
+                  :key="index"
+                  :class="{
+                    typed: index < typedText.length,
+                    error:
+                      index < typedText.length && char !== typedText[index],
+                  }"
+                  >{{ char }}</span
+                >
               </span>
-              <div class="cursor" :style="{ left: cursorPosition + 'px', top: cursorTop + 'px' }">|</div>
+              <div
+                class="cursor"
+                :style="{ left: cursorPosition + 'px', top: cursorTop + 'px' }"
+              >
+                |
+              </div>
             </div>
             <div class="stats">
               <span>WPM: {{ wpm }}</span>
@@ -78,93 +144,145 @@
         </frame-component>
         <div class="fr right">
           <frame-component type="game-small-vertical">
-            <div style="width: 100%; height: 80%" class="content content-small">
-              <transition-group name="log-item" tag="div">
-                <span v-for="(log, index) in actionLog.slice(-5)" :key="log + index" class="log-entry">
+            <div
+              class="content content-small logs-container"
+              ref="logsContainer"
+            >
+              <transition-group name="log-item" tag="div" class="logs-list">
+                <div
+                  v-for="(log, index) in actionLog"
+                  :key="log + index"
+                  class="log-entry"
+                >
                   {{ log }}
-                </span>
+                </div>
               </transition-group>
             </div>
           </frame-component>
         </div>
-        <img class="char" :class="{ 'damaged': isDamaged }" :src="monsterImageUrl" />
+        <img
+          class="char"
+          :class="{ damaged: isDamaged }"
+          :src="monsterImageUrl"
+        />
       </div>
     </div>
   </div>
   <modal-component :open="exited" @will-dismiss="handleBack">
-    <frame-component type="generic-big-squared-rounded" style="width: 35svw !important; overflow: hidden;">
-      <div class="stats-modal">
-        <div class="stats-header-row">
-          <div class="stats-header">Statistic</div>
-          <div class="stats-datetime">
-            <div>{{ formattedDate }}</div>
-            <div>{{ formattedTime2 }}</div>
+    <div class="modals-container">
+      <frame-component
+        type="generic-big-squared-rounded"
+        style="height: 65svh !important; overflow: hidden"
+      >
+        <div class="stats-modal">
+          <div class="stats-header-row">
+            <div class="stats-header">Statistic</div>
+            <div class="stats-datetime">
+              <div>{{ formattedDate }}</div>
+              <div>{{ formattedTime2 }}</div>
+            </div>
+          </div>
+          <div class="stats-section">
+            <div class="stats-row">
+              <span class="section-title">Session info</span>
+              <span class="value">Game {{ gameResult?.game_id || "N/A" }}</span>
+            </div>
+            <div class="stats-row">
+              <span class="label">Word</span>
+              <span class="value">{{ Math.floor(typedText.length / 5) }}</span>
+            </div>
+            <div class="stats-row">
+              <span class="label">Error</span>
+              <span class="value">{{ totalWordErrors + errors }}</span>
+            </div>
+            <div class="stats-row">
+              <span class="label">Accuracy</span>
+              <span class="value"
+                >{{
+                  textsCompleted > 0
+                    ? Math.round(totalAccuracy / textsCompleted)
+                    : accuracy
+                }}%</span
+              >
+            </div>
+            <div class="stats-row">
+              <span class="label">WPM</span>
+              <span class="value">{{
+                textsCompleted > 0 ? Math.round(totalWpm / textsCompleted) : wpm
+              }}</span>
+            </div>
+            <div class="stats-row">
+              <span class="label">WPS</span>
+              <span class="value">{{
+                (
+                  (textsCompleted > 0 ? totalWpm / textsCompleted : wpm) / 60
+                ).toFixed(1)
+              }}</span>
+            </div>
+          </div>
+          <div class="stats-section">
+            <div class="section-title">Session reward</div>
+            <div class="stats-row">
+              <span class="label">Exp</span>
+              <span class="value">{{ gameResult?.exp_gained || 0 }}</span>
+            </div>
+            <div class="stats-row">
+              <span class="label">gold</span>
+              <span class="value">{{ gameResult?.gold_gained || 0 }}</span>
+            </div>
+          </div>
+          <div class="stats-section">
+            <div class="section-title">Kills info</div>
+            <div class="stats-row">
+              <span class="label">Monsters kill</span>
+              <span class="value">{{ monstersDefeated.length }}</span>
+            </div>
+            <div class="stats-row">
+              <span class="label">Total damage</span>
+              <span class="value">{{ totalDamageDealt }}</span>
+            </div>
+            <div class="stats-row">
+              <span class="label">Total damage taken</span>
+              <span class="value">{{ Math.round(totalDamageTaken) }}</span>
+            </div>
+          </div>
+          <div class="stats-footer">
+            <button class="back-button" @click="handleBack">Back</button>
           </div>
         </div>
-        <div class="stats-section">
-          <div class="stats-row">
-            <span class="section-title">Session info</span>
-            <span class="value">Game {{ gameResult?.game_id || 'N/A' }}</span>
-          </div>
-          <div class="stats-row">
-            <span class="label">Word</span>
-            <span class="value">{{ Math.floor(typedText.length / 5) }}</span>
-          </div>
-          <div class="stats-row">
-            <span class="label">Error</span>
-            <span class="value">{{ totalWordErrors + errors }}</span>
-          </div>
-          <div class="stats-row">
-            <span class="label">Accuracy</span>
-            <span class="value">{{ textsCompleted > 0 ? Math.round(totalAccuracy / textsCompleted) : accuracy }}%</span>
-          </div>
-          <div class="stats-row">
-            <span class="label">WPM</span>
-            <span class="value">{{ textsCompleted > 0 ? Math.round(totalWpm / textsCompleted) : wpm }}</span>
-          </div>
-          <div class="stats-row">
-            <span class="label">WPS</span>
-            <span class="value">{{ ((textsCompleted > 0 ? totalWpm / textsCompleted : wpm) / 60).toFixed(1) }}</span>
+      </frame-component>
+      <frame-component
+        type="generic-tall-squared"
+        class="logs-modal-frame"
+        style="height: 65svh !important"
+      >
+        <div class="logs-modal">
+          <div class="logs-modal-header">Game Log</div>
+          <div class="logs-modal-content">
+            <div
+              v-for="(log, index) in actionLog"
+              :key="index"
+              class="log-modal-entry"
+            >
+              {{ log }}
+            </div>
           </div>
         </div>
-        <div class="stats-section">
-          <div class="section-title">Session reward</div>
-          <div class="stats-row">
-            <span class="label">Exp</span>
-            <span class="value">{{ gameResult?.exp_gained || 0 }}</span>
-          </div>
-          <div class="stats-row">
-            <span class="label">gold</span>
-            <span class="value">{{ gameResult?.gold_gained || 0 }}</span>
-          </div>
-        </div>
-        <div class="stats-section">
-          <div class="section-title">Kills info</div>
-          <div class="stats-row">
-            <span class="label">Monsters kill</span>
-            <span class="value">{{ monstersDefeated.length }}</span>
-          </div>
-          <div class="stats-row">
-            <span class="label">Total damage</span>
-            <span class="value">{{ totalDamageDealt }}</span>
-          </div>
-          <div class="stats-row">
-            <span class="label">Total damage taken</span>
-            <span class="value">{{ Math.round(totalDamageTaken) }}</span>
-          </div>
-        </div>
-        <div class="stats-footer">
-          <button class="back-button" @click="handleBack">Back</button>
-        </div>
-      </div>
-    </frame-component>
+      </frame-component>
+    </div>
   </modal-component>
-  <modal-component :open="showSkillModal" @will-dismiss="showSkillModal = false">
-    <frame-component class="skill-info-frame" style="max-width: 40svw;">
+  <modal-component
+    :open="showSkillModal"
+    @will-dismiss="showSkillModal = false"
+  >
+    <frame-component class="skill-info-frame" style="max-width: 40svw">
       <div class="skill-info-card" v-if="selectedSkill">
         <div class="skill-header">
           <div class="skill-icon-large">
-            <img :src="getSkillIcon(selectedSkill.id)" :alt="selectedSkill.name" />
+            <img
+              :src="getSkillIcon(selectedSkill.id)"
+              :alt="selectedSkill.name"
+            />
           </div>
           <div class="skill-title">
             <div class="skill-name">{{ selectedSkill.name }}</div>
@@ -172,9 +290,16 @@
           </div>
         </div>
         <div class="skill-description">{{ selectedSkill.description }}</div>
-        <div class="skill-stats" v-if="selectedSkill.stats && selectedSkill.stats.length > 0">
+        <div
+          class="skill-stats"
+          v-if="selectedSkill.stats && selectedSkill.stats.length > 0"
+        >
           <div class="skill-stat-title">Effects:</div>
-          <div v-for="stat in selectedSkill.stats" :key="stat" class="skill-stat-line">
+          <div
+            v-for="stat in selectedSkill.stats"
+            :key="stat"
+            class="skill-stat-line"
+          >
             <span class="skill-stat-dot">•</span>
             <span class="skill-stat-text">{{ stat }}</span>
           </div>
@@ -186,8 +311,7 @@
   <div class="bg" />
 </template>
 <style scoped lang="scss">
-@use '@/assets/styles/variables' as *;
-
+@use "@/assets/styles/variables" as *;
 .bg {
   position: fixed;
   height: 100svh;
@@ -195,40 +319,36 @@
   top: 0;
   z-index: -1;
   left: 0;
-  background: url("@/assets/images/background/play.png") no-repeat center center fixed;
+  background: url("@/assets/images/background/play.png") no-repeat center center
+    fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
 }
-
 .page {
+  width: calc(100% - 2 * $spacing-md);
   padding: $spacing-md;
   max-height: 1080px;
-
   .header {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: flex-start;
     gap: min(10vw, 192px);
-
     .bar-col {
       display: flex;
       flex-direction: column;
       gap: $spacing-md;
     }
-
     .clock {
       width: 30rem;
-
       .clock-in {
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: center;
         overflow: hidden;
-
         span {
           font-weight: $font-weight-normal;
           font-size: $font-size-2xl;
@@ -240,10 +360,8 @@
       }
     }
   }
-
   .game-area {
     width: 100svw;
-
     .left {
       width: min(20vw, 384px);
       position: absolute;
@@ -251,14 +369,12 @@
       top: 62.5%;
       transform: translateY(-50%);
     }
-
     .right {
       position: absolute;
       width: min(13vw, 250px);
       left: calc(min(100vw, 1920px) / 2);
       top: 62.5%;
       transform: translateY(-50%);
-
       .content {
         padding: $spacing-sm;
         width: calc(100% - #{$spacing-md}) !important;
@@ -266,7 +382,6 @@
         justify-content: flex-start !important;
       }
     }
-
     .left,
     .right {
       .content {
@@ -274,7 +389,6 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-
         span {
           font-weight: $font-weight-normal;
           font-size: $font-size-xl;
@@ -283,28 +397,57 @@
           vertical-align: middle;
           color: $color-text-disabled;
         }
-
         .content-small {
-          gap: $spacing-md;
-
+          &.logs-container {
+            padding: 1rem 0.5rem;
+            height: calc(100% - 2rem) !important;
+            overflow-y: auto;
+            overflow-x: hidden;
+            align-items: flex-start;
+            padding-right: $spacing-xs;
+            &::-webkit-scrollbar {
+              width: 4px;
+            }
+            &::-webkit-scrollbar-track {
+              background: rgba(0, 0, 0, 0.2);
+              border-radius: 2px;
+            }
+            &::-webkit-scrollbar-thumb {
+              background: rgba(123, 123, 123, 0.5);
+              border-radius: 2px;
+              &:hover {
+                background: rgba(123, 123, 123, 0.7);
+              }
+            }
+          }
+          .logs-list {
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-lg;
+            width: 100%;
+          }
           span {
             font-size: $font-size-base;
           }
-
           .log-entry {
             display: block;
-            animation: logFadeIn $transition-slow;
+            font-size: $font-size-base;
+            white-space: pre-line;
+            line-height: 1.4;
+            color: $color-text-disabled;
+            text-align: center;
+            transition:
+              opacity 0.3s ease-out,
+              transform 0.3s ease-out;
           }
         }
       }
     }
-
     .active {
       padding-top: min(12vh, 194px);
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-
       .pause {
         width: calc(100% - #{$spacing-3xl * 2});
         height: calc(100% - #{$spacing-3xl} - #{$spacing-2xl});
@@ -315,7 +458,6 @@
         position: absolute;
         z-index: 128312;
         backdrop-filter: blur(2px);
-
         div {
           span {
             font-size: $font-size-xl;
@@ -323,16 +465,13 @@
             font-weight: $font-weight-semibold;
             transition: color $transition-fast;
             cursor: pointer;
-
             &:hover {
               color: $color-gold-primary;
             }
           }
         }
       }
-
       .words-game {
-        background-color: $color-bg-base;
         padding: $spacing-sm $spacing-lg;
         width: calc(100% - #{$spacing-2xl + $spacing-md});
         height: calc(100% - #{$spacing-md});
@@ -340,10 +479,11 @@
         flex-direction: column;
         justify-content: space-between;
         align-items: center;
-
         .words-container {
           position: relative;
-
+          display: flex;
+          align-items: center;
+          justify-content: center;
           .cursor {
             position: absolute;
             top: 0;
@@ -357,7 +497,6 @@
             pointer-events: none;
           }
         }
-
         .word {
           font-weight: $font-weight-normal;
           font-size: $font-size-2xl;
@@ -366,27 +505,22 @@
           vertical-align: middle;
           letter-spacing: 0.05em;
           font-family: $font-family-primary;
-
           span {
             color: $color-text-disabled;
             transition: color $transition-fast;
-
             &.typed {
               color: $color-text-primary;
             }
-
             &.error {
               color: $color-error;
             }
           }
         }
-
         .stats {
           display: flex;
           flex-direction: row;
           gap: $spacing-xl;
           justify-content: center;
-
           span {
             font-size: $font-size-lg;
             color: $color-text-disabled;
@@ -396,15 +530,15 @@
         }
       }
     }
-
     .char {
       max-width: 30svw;
       position: absolute;
       top: min(-5vh, -54px);
       left: 50%;
       transform: translateX(-50%);
-      transition: transform $transition-fast, filter $transition-fast;
-
+      transition:
+        transform $transition-fast,
+        filter $transition-fast;
       &.damaged {
         filter: sepia(1) saturate(5) hue-rotate(-50deg) brightness(0.8);
         transform: translateX(-50%) scale(0.95);
@@ -412,19 +546,28 @@
     }
   }
 }
-
-@keyframes logFadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.log-item-enter-active {
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
+.log-item-leave-active {
+  transition: none;
+  position: absolute;
+  opacity: 0;
+}
+.log-item-enter-from {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+}
+.log-item-enter-to {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.log-item-leave-to {
+  opacity: 0;
+}
+.log-item-move {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 .damage-overlay {
   position: fixed;
   top: 0;
@@ -436,71 +579,69 @@
   pointer-events: none;
   z-index: 10;
 }
-
 @keyframes damageFlash {
   0% {
     opacity: 0;
   }
-
   50% {
     opacity: 1;
   }
-
   100% {
     opacity: 0;
   }
 }
-
 @keyframes blink {
-
   0%,
   50% {
     opacity: 1;
   }
-
   51%,
   100% {
     opacity: 0;
   }
 }
-
 .skill-info-frame {
   .skill-info-card {
-    background: linear-gradient(135deg, $color-bg-base 0%, $color-brown-accent 100%);
+    background: linear-gradient(
+      135deg,
+      $color-bg-base 0%,
+      $color-brown-accent 100%
+    );
     padding: $spacing-xl;
     display: flex;
     flex-direction: column;
     gap: $spacing-lg;
     min-height: 300px;
-
     .skill-header {
       display: flex;
       flex-direction: row;
       gap: $spacing-lg;
       align-items: center;
-
       .skill-icon-large {
         width: 100px;
         height: 100px;
         border-radius: 50%;
         border: 3px solid $color-gold-primary;
         overflow: hidden;
-        background: linear-gradient(135deg, $color-brown-medium 0%, $color-brown-dark 100%);
+        background: linear-gradient(
+          135deg,
+          $color-brown-medium 0%,
+          $color-brown-dark 100%
+        );
         box-shadow: $shadow-md, $glow-gold-sm;
-        transition: transform $transition-base, box-shadow $transition-base;
-
+        transition:
+          transform $transition-base,
+          box-shadow $transition-base;
         img {
           width: 100%;
           height: 100%;
           object-fit: cover;
         }
       }
-
       .skill-title {
         display: flex;
         flex-direction: column;
         gap: $spacing-sm;
-
         .skill-name {
           font-size: $font-size-3xl;
           font-weight: $font-weight-bold;
@@ -508,7 +649,6 @@
           text-shadow: $glow-gold-sm;
           font-family: $font-family-display;
         }
-
         .skill-type {
           font-size: $font-size-base;
           color: $color-text-disabled;
@@ -517,7 +657,6 @@
         }
       }
     }
-
     .skill-description {
       font-size: $font-size-lg;
       color: $color-text-secondary;
@@ -525,12 +664,10 @@
       font-style: italic;
       font-family: $font-family-primary;
     }
-
     .skill-stats {
       display: flex;
       flex-direction: column;
       gap: $spacing-sm;
-
       .skill-stat-title {
         font-size: $font-size-xl;
         font-weight: $font-weight-semibold;
@@ -538,18 +675,15 @@
         margin-bottom: $spacing-xs;
         font-family: $font-family-display;
       }
-
       .skill-stat-line {
         display: flex;
         flex-direction: row;
         gap: $spacing-sm;
         align-items: center;
-
         .skill-stat-dot {
           color: $color-gold-primary;
           font-size: $font-size-2xl;
         }
-
         .skill-stat-text {
           font-size: $font-size-lg;
           color: $color-text-primary;
@@ -560,7 +694,6 @@
     }
   }
 }
-
 .skills-deck {
   display: flex;
   flex-direction: row;
@@ -573,7 +706,6 @@
   margin-left: 1rem;
   overflow-y: auto;
   max-height: 100%;
-
   .skill-card {
     width: 2rem;
     height: 2rem;
@@ -582,29 +714,24 @@
     transition: all $transition-base;
     cursor: pointer;
     flex-shrink: 0;
-
     &:hover {
       transform: scale(1.1);
       box-shadow: $shadow-sm, $glow-gold-md;
     }
-
     img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       transition: filter $transition-base;
     }
-
     &.on-cooldown {
       img {
         filter: grayscale(100%) brightness(0.4);
       }
-
       .cooldown-overlay {
         display: flex;
       }
     }
-
     .cooldown-overlay {
       position: absolute;
       top: 0;
@@ -615,7 +742,6 @@
       display: none;
       align-items: center;
       justify-content: center;
-
       span {
         font-size: $font-size-2xl;
         font-weight: $font-weight-bold;
@@ -625,7 +751,68 @@
     }
   }
 }
-
+.modals-container {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-xl;
+  align-items: flex-start;
+  position: relative;
+}
+.logs-modal-frame {
+  position: absolute;
+  left: calc(35svw + #{$spacing-xl});
+  top: 0;
+  width: 25svw !important;
+  max-height: 70svh;
+  overflow: hidden;
+}
+.logs-modal {
+  background: $color-bg-base;
+  padding: 2rem;
+  width: calc(100% - 2 * 2rem) !important;
+  height: calc(100% - 2.4rem) !important;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: $color-text-primary;
+  gap: 0.8rem;
+  .logs-modal-header {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-normal;
+    color: $color-text-primary;
+    text-align: center;
+    font-family: $font-family-primary;
+  }
+  .logs-modal-content {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-right: $spacing-xs;
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    &::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 2px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(123, 123, 123, 0.5);
+      border-radius: 2px;
+      &:hover {
+        background: rgba(123, 123, 123, 0.7);
+      }
+    }
+  }
+  .log-modal-entry {
+    font-size: 1.2rem;
+    white-space: pre-line;
+    color: $color-text-disabled;
+    text-align: center;
+    font-family: $font-family-primary;
+  }
+}
 .stats-modal {
   background: $color-bg-base;
   padding: 2rem;
@@ -634,14 +821,12 @@
   gap: $spacing-sm;
   flex-direction: column;
   color: $color-text-primary;
-
   .stats-header-row {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: $spacing-xs;
   }
-
   .stats-header {
     font-size: $font-size-2xl;
     font-weight: $font-weight-normal;
@@ -649,57 +834,47 @@
     text-align: left;
     font-family: $font-family-primary;
   }
-
   .stats-datetime {
     color: $color-text-disabled;
     text-align: right;
     font-family: $font-family-primary;
-
     div {
       line-height: 1.4;
     }
   }
-
   .stats-game-id {
     color: $color-text-disabled;
     text-align: right;
     font-family: $font-family-primary;
     margin-bottom: $spacing-sm;
   }
-
   .stats-section {
     display: flex;
     flex-direction: column;
-
     .section-title {
       color: $color-text-primary;
       font-family: $font-family-primary;
       margin-bottom: $spacing-xs;
     }
-
     .stats-row {
       display: flex;
       justify-content: space-between;
       padding: $spacing-xs 0;
       font-family: $font-family-primary;
-
       .label {
         color: $color-text-disabled;
       }
-
       .value {
         color: $color-text-primary;
         text-align: right;
       }
     }
   }
-
   .stats-footer {
     display: flex;
     justify-content: center;
     padding-top: $spacing-lg;
     margin-top: auto;
-
     .back-button {
       position: absolute;
       bottom: 1rem;
@@ -712,12 +887,10 @@
       cursor: pointer;
       transition: all $transition-base;
       font-family: $font-family-primary;
-
       &:hover {
         border-color: $color-text-primary;
         background: rgba($color-text-primary, 0.1);
       }
-
       &:active {
         transform: translateY(1px);
       }
@@ -726,56 +899,83 @@
 }
 </style>
 <script>
-import { useCharacterStore } from '@/stores/character'
-import { useGameStore } from '@/stores/game'
-import FrameComponent from "@/components/game/FrameComponent.vue"
-import ModalComponent from "@/components/ModalComponent.vue"
-import { Howl } from 'howler'
-import skill1 from '@/assets/images/skillsicons/ (1).png'
-import skill2 from '@/assets/images/skillsicons/ (2).png'
-import skill3 from '@/assets/images/skillsicons/ (3).png'
-import skill4 from '@/assets/images/skillsicons/ (4).png'
-import skill5 from '@/assets/images/skillsicons/ (5).png'
-import skill6 from '@/assets/images/skillsicons/ (6).png'
-import skill7 from '@/assets/images/skillsicons/ (7).png'
-import skill8 from '@/assets/images/skillsicons/ (8).png'
-import skill9 from '@/assets/images/skillsicons/ (9).png'
-import skill10 from '@/assets/images/skillsicons/ (10).png'
-import skill11 from '@/assets/images/skillsicons/ (11).png'
-import skill12 from '@/assets/images/skillsicons/ (12).png'
-import skill13 from '@/assets/images/skillsicons/ (13).png'
-import skill14 from '@/assets/images/skillsicons/ (14).png'
-import skill15 from '@/assets/images/skillsicons/ (15).png'
-import skill16 from '@/assets/images/skillsicons/ (16).png'
-import skill17 from '@/assets/images/skillsicons/ (17).png'
-import skill18 from '@/assets/images/skillsicons/ (18).png'
-import skill19 from '@/assets/images/skillsicons/ (19).png'
-import skill20 from '@/assets/images/skillsicons/ (20).png'
-import skill21 from '@/assets/images/skillsicons/ (21).png'
-import skill22 from '@/assets/images/skillsicons/ (22).png'
-import skill23 from '@/assets/images/skillsicons/ (23).png'
-import skill24 from '@/assets/images/skillsicons/ (24).png'
-import skill25 from '@/assets/images/skillsicons/ (25).png'
-import skill26 from '@/assets/images/skillsicons/ (26).png'
-import skill27 from '@/assets/images/skillsicons/ (27).png'
-import skill28 from '@/assets/images/skillsicons/ (28).png'
-import skill29 from '@/assets/images/skillsicons/ (29).png'
-import skill30 from '@/assets/images/skillsicons/ (30).png'
-import skill31 from '@/assets/images/skillsicons/ (31).png'
-import skill32 from '@/assets/images/skillsicons/ (32).png'
-import skill33 from '@/assets/images/skillsicons/ (33).png'
-import skill34 from '@/assets/images/skillsicons/ (34).png'
-import { API_BASE_URL } from '@/api/client'
+import { useCharacterStore } from "@/stores/character";
+import { useGameStore } from "@/stores/game";
+import FrameComponent from "@/components/game/FrameComponent.vue";
+import ModalComponent from "@/components/ModalComponent.vue";
+import { Howl } from "howler";
+import skill1 from "@/assets/images/skillsicons/ (1).png";
+import skill2 from "@/assets/images/skillsicons/ (2).png";
+import skill3 from "@/assets/images/skillsicons/ (3).png";
+import skill4 from "@/assets/images/skillsicons/ (4).png";
+import skill5 from "@/assets/images/skillsicons/ (5).png";
+import skill6 from "@/assets/images/skillsicons/ (6).png";
+import skill7 from "@/assets/images/skillsicons/ (7).png";
+import skill8 from "@/assets/images/skillsicons/ (8).png";
+import skill9 from "@/assets/images/skillsicons/ (9).png";
+import skill10 from "@/assets/images/skillsicons/ (10).png";
+import skill11 from "@/assets/images/skillsicons/ (11).png";
+import skill12 from "@/assets/images/skillsicons/ (12).png";
+import skill13 from "@/assets/images/skillsicons/ (13).png";
+import skill14 from "@/assets/images/skillsicons/ (14).png";
+import skill15 from "@/assets/images/skillsicons/ (15).png";
+import skill16 from "@/assets/images/skillsicons/ (16).png";
+import skill17 from "@/assets/images/skillsicons/ (17).png";
+import skill18 from "@/assets/images/skillsicons/ (18).png";
+import skill19 from "@/assets/images/skillsicons/ (19).png";
+import skill20 from "@/assets/images/skillsicons/ (20).png";
+import skill21 from "@/assets/images/skillsicons/ (21).png";
+import skill22 from "@/assets/images/skillsicons/ (22).png";
+import skill23 from "@/assets/images/skillsicons/ (23).png";
+import skill24 from "@/assets/images/skillsicons/ (24).png";
+import skill25 from "@/assets/images/skillsicons/ (25).png";
+import skill26 from "@/assets/images/skillsicons/ (26).png";
+import skill27 from "@/assets/images/skillsicons/ (27).png";
+import skill28 from "@/assets/images/skillsicons/ (28).png";
+import skill29 from "@/assets/images/skillsicons/ (29).png";
+import skill30 from "@/assets/images/skillsicons/ (30).png";
+import skill31 from "@/assets/images/skillsicons/ (31).png";
+import skill32 from "@/assets/images/skillsicons/ (32).png";
+import skill33 from "@/assets/images/skillsicons/ (33).png";
+import skill34 from "@/assets/images/skillsicons/ (34).png";
+import { API_BASE_URL } from "@/api/client";
 const BASE_URL = API_BASE_URL;
 const skillIcons = {
-  1: skill1, 2: skill2, 3: skill3, 4: skill4, 5: skill5,
-  6: skill6, 7: skill7, 8: skill8, 9: skill9, 10: skill10,
-  11: skill11, 12: skill12, 13: skill13, 14: skill14, 15: skill15,
-  16: skill16, 17: skill17, 18: skill18, 19: skill19, 20: skill20,
-  21: skill21, 22: skill22, 23: skill23, 24: skill24, 25: skill25,
-  26: skill26, 27: skill27, 28: skill28, 29: skill29, 30: skill30,
-  31: skill31, 32: skill32, 33: skill33, 34: skill34
-}
+  1: skill1,
+  2: skill2,
+  3: skill3,
+  4: skill4,
+  5: skill5,
+  6: skill6,
+  7: skill7,
+  8: skill8,
+  9: skill9,
+  10: skill10,
+  11: skill11,
+  12: skill12,
+  13: skill13,
+  14: skill14,
+  15: skill15,
+  16: skill16,
+  17: skill17,
+  18: skill18,
+  19: skill19,
+  20: skill20,
+  21: skill21,
+  22: skill22,
+  23: skill23,
+  24: skill24,
+  25: skill25,
+  26: skill26,
+  27: skill27,
+  28: skill28,
+  29: skill29,
+  30: skill30,
+  31: skill31,
+  32: skill32,
+  33: skill33,
+  34: skill34,
+};
 export default {
   name: "GameView",
   components: { ModalComponent, FrameComponent },
@@ -787,6 +987,9 @@ export default {
       timerInterval: null,
       allTexts: [],
       currentTextIndex: 0,
+      fullText: "",
+      textSegments: [],
+      currentSegmentIndex: 0,
       currentText: "",
       typedText: "",
       startTime: null,
@@ -802,9 +1005,9 @@ export default {
       correctChars: 0,
       totalChars: 0,
       accuracy: 0,
-      lastCompletedWord: '',
+      lastCompletedWord: "",
       isDamaged: false,
-      currentWord: '',
+      currentWord: "",
       wordHasError: false,
       actionLog: [],
       playerDamaged: false,
@@ -824,7 +1027,7 @@ export default {
         error_attack: 0.0652,
         hp: 160,
         random_attack: 0.0326,
-        wpm_drop_attack: 0.1751
+        wpm_drop_attack: 0.1751,
       },
       monstersDefeated: [],
       totalWpm: 0,
@@ -841,32 +1044,188 @@ export default {
       showSkillModal: false,
       selectedSkill: null,
       skillsInfo: {
-        1: { id: 1, name: 'Blade Fury', type: 'Passive', description: 'Your typing speed empowers your strikes.', stats: ['+1% damage per 10 WPM'] },
-        2: { id: 2, name: 'Confidence', type: 'Passive', description: 'Maintaining combos sharpens your focus.', stats: ['+5% crit chance when combo > 5'] },
-        3: { id: 3, name: 'Cold-Blooded', type: 'Passive', description: 'Perfect accuracy unleashes devastating criticals.', stats: ['+15% crit multiplier when accuracy > 95%'] },
-        4: { id: 4, name: 'Assassin\'s Path', type: 'Passive', description: 'Precision typing increases your lethality.', stats: ['+10% damage when accuracy > 90%'] },
-        5: { id: 5, name: 'Resonance', type: 'Passive', description: 'Extreme speed amplifies critical strikes.', stats: ['+10% crit multiplier per 50 WPM'] },
-        7: { id: 7, name: 'Nimble', type: 'Passive', description: 'Your reflexes are permanently enhanced.', stats: ['+5% agility'] },
-        8: { id: 8, name: 'Weak Spot', type: 'Passive', description: 'Critical hits improve your defensive stance.', stats: ['+4% block chance on crit'] },
-        10: { id: 10, name: 'Unbreakable Will', type: 'Passive', description: 'Flawless typing fortifies your defenses.', stats: ['+10% defense at 100% accuracy'] },
-        12: { id: 12, name: 'Bastion', type: 'Passive', description: 'Trade offense for superior defense.', stats: ['-20% damage taken', '-10% damage dealt'] },
-        13: { id: 13, name: 'Resolute Spirit', type: 'Reactive', description: 'Mistakes make you tougher temporarily.', stats: ['+5% defense for 3s after error'] },
-        14: { id: 14, name: 'Second Block', type: 'Passive', description: 'Combo streaks improve blocking ability.', stats: ['+5% block chance when combo > 5'] },
-        15: { id: 15, name: 'Counterstrike', type: 'Reactive', description: 'Successful blocks empower your next attack.', stats: ['+30% damage on next attack after block'] },
-        16: { id: 16, name: 'Ricochet', type: 'Active - 50 Mana', description: 'Reflect damage back when blocking.', stats: ['100% damage reflection on block'] },
-        18: { id: 18, name: 'Mind Focus', type: 'Passive', description: 'Precision typing enhances mana regeneration.', stats: ['+10% mana gain when accuracy > 95%'] },
-        19: { id: 19, name: 'Flow', type: 'Passive', description: 'Typing speed increases mana restoration.', stats: ['+1% mana gain per 10 WPM'] },
-        20: { id: 20, name: 'Shield', type: 'Active - 50 Mana', description: 'Create a barrier to negate incoming damage.', stats: ['Nullify next attack'] },
-        21: { id: 21, name: 'Mana Transfusion', type: 'Passive', description: 'Convert stored mana into raw power.', stats: ['+1% damage per 100 mana'] },
-        23: { id: 23, name: 'Fireball', type: 'Active - 100 Mana', description: 'Launch a devastating magical attack.', stats: ['Deal 5% of monster\'s current HP'] },
-        26: { id: 26, name: 'Magical Infusion', type: 'Active - 50 Mana', description: 'Enchant your next strike with arcane power.', stats: ['Next attack deals 150% damage'] },
-        27: { id: 27, name: 'Seal of Destruction', type: 'Passive', description: 'A curse that amplifies all your attacks.', stats: ['+10% to all damage'] },
-        29: { id: 29, name: 'Sphere of Ancient Wisdom', type: 'Passive', description: 'Learn faster from every encounter.', stats: ['+110% experience gain'] },
-        30: { id: 30, name: 'Golden Blessing', type: 'Passive', description: 'Fortune smiles upon you.', stats: ['+110% gold gained'] },
-        31: { id: 31, name: 'Shadow of Vengeance', type: 'Reactive', description: 'Death\'s embrace grants momentary immortality.', stats: ['Become invulnerable for 2s when HP < 30%'] },
-        32: { id: 32, name: 'Seal of Wrath', type: 'Passive', description: 'Each strike fuels the next.', stats: ['+0.5% damage per attack (stacking)'] },
-        33: { id: 33, name: 'Echo of Victory', type: 'Passive', description: 'Victories echo with greater rewards.', stats: ['50% chance for bonus rewards'] },
-        34: { id: 34, name: 'Blade of Fate', type: 'Conditional', description: 'Master combos to guarantee critical strikes.', stats: ['Next 10 attacks are crits at 10-combo'] }
+        1: {
+          id: 1,
+          name: "Blade Fury",
+          type: "Passive",
+          description: "Your typing speed empowers your strikes.",
+          stats: ["+1% damage per 10 WPM"],
+        },
+        2: {
+          id: 2,
+          name: "Confidence",
+          type: "Passive",
+          description: "Maintaining combos sharpens your focus.",
+          stats: ["+5% crit chance when combo > 5"],
+        },
+        3: {
+          id: 3,
+          name: "Cold-Blooded",
+          type: "Passive",
+          description: "Perfect accuracy unleashes devastating criticals.",
+          stats: ["+15% crit multiplier when accuracy > 95%"],
+        },
+        4: {
+          id: 4,
+          name: "Assassin's Path",
+          type: "Passive",
+          description: "Precision typing increases your lethality.",
+          stats: ["+10% damage when accuracy > 90%"],
+        },
+        5: {
+          id: 5,
+          name: "Resonance",
+          type: "Passive",
+          description: "Extreme speed amplifies critical strikes.",
+          stats: ["+10% crit multiplier per 50 WPM"],
+        },
+        7: {
+          id: 7,
+          name: "Nimble",
+          type: "Passive",
+          description: "Your reflexes are permanently enhanced.",
+          stats: ["+5% agility"],
+        },
+        8: {
+          id: 8,
+          name: "Weak Spot",
+          type: "Passive",
+          description: "Critical hits improve your defensive stance.",
+          stats: ["+4% block chance on crit"],
+        },
+        10: {
+          id: 10,
+          name: "Unbreakable Will",
+          type: "Passive",
+          description: "Flawless typing fortifies your defenses.",
+          stats: ["+10% defense at 100% accuracy"],
+        },
+        12: {
+          id: 12,
+          name: "Bastion",
+          type: "Passive",
+          description: "Trade offense for superior defense.",
+          stats: ["-20% damage taken", "-10% damage dealt"],
+        },
+        13: {
+          id: 13,
+          name: "Resolute Spirit",
+          type: "Reactive",
+          description: "Mistakes make you tougher temporarily.",
+          stats: ["+5% defense for 3s after error"],
+        },
+        14: {
+          id: 14,
+          name: "Second Block",
+          type: "Passive",
+          description: "Combo streaks improve blocking ability.",
+          stats: ["+5% block chance when combo > 5"],
+        },
+        15: {
+          id: 15,
+          name: "Counterstrike",
+          type: "Reactive",
+          description: "Successful blocks empower your next attack.",
+          stats: ["+30% damage on next attack after block"],
+        },
+        16: {
+          id: 16,
+          name: "Ricochet",
+          type: "Active - 50 Mana",
+          description: "Reflect damage back when blocking.",
+          stats: ["100% damage reflection on block"],
+        },
+        18: {
+          id: 18,
+          name: "Mind Focus",
+          type: "Passive",
+          description: "Precision typing enhances mana regeneration.",
+          stats: ["+10% mana gain when accuracy > 95%"],
+        },
+        19: {
+          id: 19,
+          name: "Flow",
+          type: "Passive",
+          description: "Typing speed increases mana restoration.",
+          stats: ["+1% mana gain per 10 WPM"],
+        },
+        20: {
+          id: 20,
+          name: "Shield",
+          type: "Active - 50 Mana",
+          description: "Create a barrier to negate incoming damage.",
+          stats: ["Nullify next attack"],
+        },
+        21: {
+          id: 21,
+          name: "Mana Transfusion",
+          type: "Passive",
+          description: "Convert stored mana into raw power.",
+          stats: ["+1% damage per 100 mana"],
+        },
+        23: {
+          id: 23,
+          name: "Fireball",
+          type: "Active - 100 Mana",
+          description: "Launch a devastating magical attack.",
+          stats: ["Deal 5% of monster's current HP"],
+        },
+        26: {
+          id: 26,
+          name: "Magical Infusion",
+          type: "Active - 50 Mana",
+          description: "Enchant your next strike with arcane power.",
+          stats: ["Next attack deals 150% damage"],
+        },
+        27: {
+          id: 27,
+          name: "Seal of Destruction",
+          type: "Passive",
+          description: "A curse that amplifies all your attacks.",
+          stats: ["+10% to all damage"],
+        },
+        29: {
+          id: 29,
+          name: "Sphere of Ancient Wisdom",
+          type: "Passive",
+          description: "Learn faster from every encounter.",
+          stats: ["+110% experience gain"],
+        },
+        30: {
+          id: 30,
+          name: "Golden Blessing",
+          type: "Passive",
+          description: "Fortune smiles upon you.",
+          stats: ["+110% gold gained"],
+        },
+        31: {
+          id: 31,
+          name: "Shadow of Vengeance",
+          type: "Reactive",
+          description: "Death's embrace grants momentary immortality.",
+          stats: ["Become invulnerable for 2s when HP < 30%"],
+        },
+        32: {
+          id: 32,
+          name: "Seal of Wrath",
+          type: "Passive",
+          description: "Each strike fuels the next.",
+          stats: ["+0.5% damage per attack (stacking)"],
+        },
+        33: {
+          id: 33,
+          name: "Echo of Victory",
+          type: "Passive",
+          description: "Victories echo with greater rewards.",
+          stats: ["50% chance for bonus rewards"],
+        },
+        34: {
+          id: 34,
+          name: "Blade of Fate",
+          type: "Conditional",
+          description: "Master combos to guarantee critical strikes.",
+          stats: ["Next 10 attacks are crits at 10-combo"],
+        },
       },
       temporaryEffects: {
         damageMultiplier: 1.0,
@@ -897,266 +1256,430 @@ export default {
       soundPack: null,
       soundVolume: 50,
       soundEnabled: true,
-      gameSessionId: null
-    }
+      gameSessionId: null,
+    };
   },
   setup() {
-    const characterStore = useCharacterStore()
-    const gameStore = useGameStore()
-    return { characterStore, gameStore }
+    const characterStore = useCharacterStore();
+    const gameStore = useGameStore();
+    return { characterStore, gameStore };
   },
   async mounted() {
-    this.gameTypeId = this.$route.params.id
-    this.gameTime = parseInt(this.$route.query.time) || 20
-    this.timeRemaining = this.gameTime * 60
-    this.startTimer()
-    this.sessionStartTime = Date.now()
-    this.gameSessionId = Math.floor(Math.random() * 90000000) + 10000000
+    this.gameTypeId = this.$route.params.id;
+    this.gameTime = parseInt(this.$route.query.time) || 20;
+    this.timeRemaining = this.gameTime * 60;
+    this.startTimer();
+    this.sessionStartTime = Date.now();
+    this.gameSessionId = Math.floor(Math.random() * 90000000) + 10000000;
     if (!this.characterStore.character) {
       try {
-        await this.characterStore.fetchCharacter()
+        await this.characterStore.fetchCharacter();
       } catch (error) {
-        console.error('Failed to fetch character data:', error)
+        console.error("Failed to fetch character data:", error);
       }
     }
     if (this.characterStore.character) {
-      const char = this.characterStore.character
-      this.playerMaxHp = char.health_points || 100
-      this.playerHp = this.playerMaxHp
-      this.playerMaxMana = char.mana || 100
-      this.playerMana = this.playerMaxMana
-      this.baseStats.damage = char.damage || 10
-      this.baseStats.critChance = char.critical_hit_chance || 0.05
-      this.baseStats.critMultiplier = (char.critical_multiplier / 100) || 1.5
-      this.baseStats.blockChance = char.block_chance || 0.1
-      this.baseStats.defense = char.defence || 5
-      this.baseStats.agility = char.agility || 10
+      const char = this.characterStore.character;
+      this.playerMaxHp = char.health_points || 100;
+      this.playerHp = this.playerMaxHp;
+      this.playerMaxMana = char.mana || 100;
+      this.playerMana = this.playerMaxMana;
+      this.baseStats.damage = char.damage || 10;
+      this.baseStats.critChance = char.critical_hit_chance || 0.05;
+      this.baseStats.critMultiplier = char.critical_multiplier / 100 || 1.5;
+      this.baseStats.blockChance = char.block_chance || 0.1;
+      this.baseStats.defense = char.defence || 5;
+      this.baseStats.agility = char.agility || 10;
       if (char.special_enum_ids && char.special_enum_ids.length > 0) {
-        this.activeSkills = Array.from(new Set(char.special_enum_ids))
-        this.skillQueue = [...this.activeSkills]
+        this.activeSkills = Array.from(new Set(char.special_enum_ids));
+        this.skillQueue = [...this.activeSkills];
       }
     }
     if (this.gameTypeId) {
       try {
-        const texts = await this.gameStore.fetchTextsForGameType(this.gameTypeId)
-        this.allTexts = texts
+        const texts = await this.gameStore.fetchTextsForGameType(
+          this.gameTypeId,
+        );
+        this.allTexts = texts;
         if (texts && texts.length > 0) {
-          const randomIndex = Math.floor(Math.random() * texts.length)
-          await this.loadText(randomIndex)
+          const randomIndex = Math.floor(Math.random() * texts.length);
+          await this.loadText(randomIndex);
         }
       } catch (error) {
-        console.error('Failed to fetch game texts:', error)
+        console.error("Failed to fetch game texts:", error);
       }
     }
-    window.addEventListener('keydown', this.handleKeyPress)
-    this.calculateCharWidth()
-    await this.loadSoundPack()
+    window.addEventListener("keydown", this.handleKeyPress);
+    this.calculateCharWidth();
+    await this.loadSoundPack();
   },
   beforeUnmount() {
-    window.removeEventListener('keydown', this.handleKeyPress)
+    window.removeEventListener("keydown", this.handleKeyPress);
     if (this.timerInterval) {
-      clearInterval(this.timerInterval)
+      clearInterval(this.timerInterval);
     }
+  },
+  watch: {
+    actionLog: {
+      handler() {
+        this.$nextTick(() => {
+          this.scrollLogsToBottom();
+        });
+      },
+      deep: true,
+    },
   },
   computed: {
     formattedTime() {
-      const minutes = Math.floor(this.timeRemaining / 60)
-      const seconds = this.timeRemaining % 60
-      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+      const minutes = Math.floor(this.timeRemaining / 60);
+      const seconds = this.timeRemaining % 60;
+      return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
     },
     formattedDate() {
-      const now = new Date()
-      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-      const day = String(now.getDate()).padStart(2, '0')
-      const month = String(now.getMonth() + 1).padStart(2, '0')
-      const year = now.getFullYear()
-      const dayName = days[now.getDay()]
-      const hours = String(now.getHours()).padStart(2, '0')
-      const minutes = String(now.getMinutes()).padStart(2, '0')
-      return `${day}.${month}.${year} - ${dayName} ${hours}:${minutes}`
+      const now = new Date();
+      const days = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+      const day = String(now.getDate()).padStart(2, "0");
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const year = now.getFullYear();
+      const dayName = days[now.getDay()];
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      return `${day}.${month}.${year} - ${dayName} ${hours}:${minutes}`;
     },
     formattedTime2() {
-      const now = new Date()
-      const hours = String(now.getHours()).padStart(2, '0')
-      const minutes = String(now.getMinutes()).padStart(2, '0')
-      const seconds = String(now.getSeconds()).padStart(2, '0')
-      return `${hours}:${minutes}:${seconds}`
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const seconds = String(now.getSeconds()).padStart(2, "0");
+      return `${hours}:${minutes}:${seconds}`;
     },
     monsterImageUrl() {
-      return `${BASE_URL}/${this.monsterPhoto}`
-    }
+      return `${BASE_URL}/${this.monsterPhoto}`;
+    },
   },
   methods: {
+    scrollLogsToBottom() {
+      if (this.$refs.logsContainer) {
+        this.$refs.logsContainer.scrollTop =
+          this.$refs.logsContainer.scrollHeight;
+      }
+    },
     startTimer() {
       this.timerInterval = setInterval(() => {
         if (!this.paused && this.timeRemaining > 0) {
-          this.timeRemaining--
+          this.timeRemaining--;
           if (this.timeRemaining === 0) {
-            this.submitGameResults()
+            this.submitGameResults();
           }
         }
-      }, 1000)
+      }, 1000);
+    },
+    splitTextIntoSegments(text) {
+      const segments = [];
+      const sentenceEnd = [".", "!", "?"];
+      const allPunctuation = [".", "!", "?", ";", ","];
+      let currentSegment = "";
+      const words = text.split(/\s+/);
+      for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        const testSegment = currentSegment ? currentSegment + " " + word : word;
+        if (testSegment.length > 200) {
+          if (currentSegment) {
+            const lastChar = currentSegment[currentSegment.length - 1];
+            if (!allPunctuation.includes(lastChar)) {
+              let backtrack = i - 1;
+              let foundSentenceEnd = false;
+              while (backtrack >= 0) {
+                const prevWord = words[backtrack];
+                const prevChar = prevWord[prevWord.length - 1];
+                if (sentenceEnd.includes(prevChar)) {
+                  const validWords = words.slice(0, backtrack + 1);
+                  currentSegment = validWords.join(" ");
+                  i = backtrack;
+                  foundSentenceEnd = true;
+                  break;
+                }
+                backtrack--;
+              }
+              if (!foundSentenceEnd) {
+                backtrack = i - 1;
+                while (backtrack >= 0) {
+                  const prevWord = words[backtrack];
+                  const prevChar = prevWord[prevWord.length - 1];
+                  if (allPunctuation.includes(prevChar)) {
+                    const validWords = words.slice(0, backtrack + 1);
+                    currentSegment = validWords.join(" ");
+                    i = backtrack;
+                    break;
+                  }
+                  backtrack--;
+                }
+              }
+            }
+            segments.push(currentSegment.trim());
+            currentSegment = "";
+          }
+        } else {
+          currentSegment = testSegment;
+          const lastChar = word[word.length - 1];
+          if (sentenceEnd.includes(lastChar) && currentSegment.length >= 50) {
+            const nextSentenceEnd = this.findNextSentenceEnd(
+              words,
+              i + 1,
+              sentenceEnd,
+            );
+            if (nextSentenceEnd !== -1) {
+              const potentialSegment = words
+                .slice(0, nextSentenceEnd + 1)
+                .join(" ");
+              if (potentialSegment.length <= 200) {
+                continue;
+              }
+            }
+            segments.push(currentSegment.trim());
+            currentSegment = "";
+          }
+        }
+      }
+      if (currentSegment.trim()) {
+        segments.push(currentSegment.trim());
+      }
+      return segments;
+    },
+    findNextSentenceEnd(words, startIndex, sentenceEnd) {
+      for (let i = startIndex; i < words.length; i++) {
+        const word = words[i];
+        const lastChar = word[word.length - 1];
+        if (sentenceEnd.includes(lastChar)) {
+          return i;
+        }
+      }
+      return -1;
     },
     async loadText(index) {
       if (index >= this.allTexts.length || index < 0) {
-        await this.submitGameResults()
-        return
+        await this.submitGameResults();
+        return;
       }
-      this.currentTextIndex = index
-      this.currentText = this.allTexts[index].value || ''
-      this.words = this.currentText.split(/\s+/).filter(w => w.length > 0)
-      await this.spawnMonster()
-      this.typedText = ''
-      this.currentWordIndex = 0
-      this.combo = 0
-      this.errors = 0
-      this.correctChars = 0
-      this.totalChars = 0
-      this.startTime = null
-      this.skillQueue = [...this.activeSkills]
-      this.skillCooldowns = {}
-      this.calculateCharWidth()
+      this.currentTextIndex = index;
+      this.fullText = this.allTexts[index].value || "";
+      this.textSegments = this.splitTextIntoSegments(this.fullText);
+      this.currentSegmentIndex = 0;
+      this.currentText = this.textSegments[0] || "";
+      this.words = this.currentText.split(/\s+/).filter((w) => w.length > 0);
+      await this.spawnMonster();
+      this.typedText = "";
+      this.currentWordIndex = 0;
+      this.combo = 0;
+      this.errors = 0;
+      this.correctChars = 0;
+      this.totalChars = 0;
+      this.startTime = null;
+      this.skillQueue = [...this.activeSkills];
+      this.skillCooldowns = {};
+      this.calculateCharWidth();
+      this.$nextTick(() => {
+        this.updateCursorPosition();
+      });
+    },
+    loadNextSegment() {
+      this.currentSegmentIndex++;
+      if (this.currentSegmentIndex >= this.textSegments.length) {
+        return false;
+      }
+      this.currentText = this.textSegments[this.currentSegmentIndex];
+      this.words = this.currentText.split(/\s+/).filter((w) => w.length > 0);
+      this.typedText = "";
+      this.currentWordIndex = 0;
+      this.currentWord = "";
+      this.wordHasError = false;
+      this.startTime = Date.now();
+      this.cursorPosition = 0;
+      this.cursorTop = 0;
+      this.calculateCharWidth();
+      this.$nextTick(() => {
+        this.updateCursorPosition();
+      });
+      return true;
     },
     async spawnMonster() {
       try {
-        const monster = await this.gameStore.generateMonster(this.monsterLevel + Math.floor(this.characterStore.character.lvl / 5))
+        const monster = await this.gameStore.generateMonster(
+          this.monsterLevel + Math.floor(this.characterStore.character.lvl / 5),
+        );
         this.monsterStats = {
           damage: monster.damage || 20,
           error_attack: monster.error_attack || 0.05,
           hp: monster.hp || 100,
           random_attack: monster.random_attack || 0.03,
-          wpm_drop_attack: monster.wpm_drop_attack || 0.15
-        }
-        this.monsterMaxHp = monster.hp || 100
-        this.monsterHp = this.monsterMaxHp
-        this.monsterPhoto = monster.photo || null
-        this.actionLog.push(`Monster level ${this.monsterLevel} spawned!`)
+          wpm_drop_attack: monster.wpm_drop_attack || 0.15,
+        };
+        this.monsterMaxHp = monster.hp || 100;
+        this.monsterHp = this.monsterMaxHp;
+        this.monsterPhoto = monster.photo || null;
       } catch (error) {
-        console.error('Failed to spawn monster:', error)
+        console.error("Failed to spawn monster:", error);
       }
     },
     async submitGameResults() {
       if (this.timerInterval) {
-        clearInterval(this.timerInterval)
+        clearInterval(this.timerInterval);
       }
-      const sessionTime = (Date.now() - this.sessionStartTime) / 1000
-      const avgWpm = this.textsCompleted > 0 ? this.totalWpm / this.textsCompleted : this.wpm
-      const avgAccuracy = this.textsCompleted > 0 ? this.totalAccuracy / this.textsCompleted : this.accuracy
+      const sessionTime = (Date.now() - this.sessionStartTime) / 1000;
+      const avgWpm =
+        this.textsCompleted > 0
+          ? this.totalWpm / this.textsCompleted
+          : this.wpm;
+      const avgAccuracy =
+        this.textsCompleted > 0
+          ? this.totalAccuracy / this.textsCompleted
+          : this.accuracy;
       try {
         const result = await this.gameStore.saveGameResult({
           sessionTime: sessionTime,
           avgWpm: avgWpm,
           avgAccuracy: avgAccuracy,
           wordError: this.totalWordErrors + this.errors,
-          monstersDefeated: this.monstersDefeated
-        })
-        this.gameResult = result
-        this.exited = true
+          monstersDefeated: this.monstersDefeated,
+        });
+        this.gameResult = result;
+        this.exited = true;
       } catch (error) {
-        console.error('Failed to submit game results:', error)
-        this.exited = true
+        console.error("Failed to submit game results:", error);
+        this.exited = true;
       }
     },
     handleBack() {
-      this.$router.push({ name: 'PlayView' })
+      this.$router.push({ name: "PlayView" });
     },
     handleExitYes() {
       this.showExitConfirm = false;
-      this.exited = true
+      this.exited = true;
     },
     handleKeyPress(e) {
-      if (e.key == 'Escape') {
-        this.paused = !this.paused
-        return
+      if (this.exited) return;
+      if (e.key == "Escape") {
+        this.paused = !this.paused;
+        return;
       }
-      if (this.paused) return
-      const keyCode = this.getKeyCode(e)
+      if (this.paused) return;
+      const keyCode = this.getKeyCode(e);
       if (keyCode) {
-        this.playKeySound(keyCode)
+        this.playKeySound(keyCode);
       }
-      if (e.key.length > 1 && e.key !== 'Backspace') return
-      if (e.key === 'Backspace') {
-        this.typedText = this.typedText.slice(0, -1)
+      if (e.key.length > 1 && e.key !== "Backspace") return;
+      if (e.key === "Backspace") {
+        this.typedText = this.typedText.slice(0, -1);
         if (this.currentWord.length > 0) {
-          this.currentWord = this.currentWord.slice(0, -1)
+          this.currentWord = this.currentWord.slice(0, -1);
         } else {
         }
-        this.cursorPosition = this.typedText.length * this.charWidth
-        this.updateCursorPosition()
+        this.cursorPosition = this.typedText.length * this.charWidth;
+        this.updateCursorPosition();
       } else {
         if (this.typedText.length === 0) {
-          this.startTime = Date.now()
+          this.startTime = Date.now();
         }
-        this.totalChars += 1
-        const expectedChar = this.currentText[this.typedText.length]
+        this.totalChars += 1;
+        const expectedChar = this.currentText[this.typedText.length];
         if (e.key === expectedChar) {
-          this.correctChars += 1
-          if (expectedChar === ' ' || expectedChar === '\n') {
-            this.currentWord = ''
-            this.wordHasError = false
+          this.correctChars += 1;
+          if (expectedChar === " " || expectedChar === "\n") {
+            this.currentWord = "";
+            this.wordHasError = false;
           } else {
-            this.currentWord += e.key
+            this.currentWord += e.key;
           }
         } else {
-          this.errors += 1
-          this.combo = 0
-          this.wordHasError = true
-          this.currentWord += e.key
+          this.errors += 1;
+          this.combo = 0;
+          this.wordHasError = true;
+          this.currentWord += e.key;
         }
-        this.typedText += e.key
-        this.cursorPosition = this.typedText.length * this.charWidth
-        this.updateCursorPosition()
-        const nextChar = this.currentText[this.typedText.length]
-        if (nextChar === ' ' || nextChar === '\n' || this.typedText.length === this.currentText.length) {
-          this.lastCompletedWord = this.words[this.currentWordIndex] || ''
-          this.currentWordIndex += 1
-          this.combo += 1
-          this.onWordCompleted()
+        this.typedText += e.key;
+        this.cursorPosition = this.typedText.length * this.charWidth;
+        this.updateCursorPosition();
+        const nextChar = this.currentText[this.typedText.length];
+        if (
+          nextChar === " " ||
+          nextChar === "\n" ||
+          this.typedText.length === this.currentText.length
+        ) {
+          this.lastCompletedWord = this.words[this.currentWordIndex] || "";
+          this.currentWordIndex += 1;
+          this.combo += 1;
+          this.onWordCompleted();
         }
         if (this.typedText.length === this.currentText.length) {
-          this.calculateWPM()
-          this.calculateAccuracy()
-          this.textsCompleted++
-          this.totalWpm += this.wpm
-          this.totalAccuracy += this.accuracy
-          this.totalWordErrors += this.errors
-          setTimeout(async () => {
-            if (this.monsterHp <= 0) {
-              this.monsterLevel++
-              await this.submitGameResults()
-            } else {
-              await this.submitGameResults()
-            }
-          }, 2000)
+          this.calculateWPM();
+          this.calculateAccuracy();
+          this.textsCompleted++;
+          this.totalWpm += this.wpm;
+          this.totalAccuracy += this.accuracy;
+          this.totalWordErrors += this.errors;
+          if (this.currentSegmentIndex < this.textSegments.length - 1) {
+            setTimeout(() => {
+              this.loadNextSegment();
+            }, 500);
+          } else {
+            setTimeout(async () => {
+              if (this.monsterHp <= 0) {
+                this.monsterLevel++;
+                await this.loadText(this.currentTextIndex + 1);
+              } else {
+                await this.submitGameResults();
+              }
+            }, 2000);
+          }
         }
       }
       if (this.startTime) {
-        this.calculateWPM()
-        this.calculateAccuracy()
+        this.calculateWPM();
+        this.calculateAccuracy();
       }
     },
     calculateWPM() {
-      if (!this.startTime) return
-      const timeElapsed = (Date.now() - this.startTime) / 1000 / 60
-      const wordsTyped = this.typedText.length / 5
-      this.wpm = Math.round(wordsTyped / timeElapsed) || 0
+      if (!this.startTime) return;
+      const timeElapsed = (Date.now() - this.startTime) / 1000 / 60;
+      const wordsTyped = this.typedText.length / 5;
+      this.wpm = Math.round(wordsTyped / timeElapsed) || 0;
     },
     calculateAccuracy() {
-      this.accuracy = this.totalChars > 0 ? Math.round((this.correctChars / this.totalChars) * 100) : 0
+      this.accuracy =
+        this.totalChars > 0
+          ? Math.round((this.correctChars / this.totalChars) * 100)
+          : 0;
     },
     calculateCharWidth() {
       this.$nextTick(() => {
         if (this.$refs.word && this.$refs.word.children[0]) {
-          this.charWidth = this.$refs.word.children[0].getBoundingClientRect().width
+          this.charWidth =
+            this.$refs.word.children[0].getBoundingClientRect().width;
         }
-      })
+      });
     },
     updateCursorPosition() {
       this.$nextTick(() => {
         const typedLength = this.typedText.length;
         if (typedLength === 0) {
-          this.cursorPosition = 0;
-          this.cursorTop = 0;
+          if (this.$refs.word && this.$refs.word.children[0]) {
+            const firstCharElement = this.$refs.word.children[0];
+            const rect = firstCharElement.getBoundingClientRect();
+            const containerRect = this.$refs.word.getBoundingClientRect();
+            this.cursorPosition = rect.left - containerRect.left;
+            this.cursorTop = rect.top - containerRect.top;
+          } else {
+            this.cursorPosition = 0;
+            this.cursorTop = 0;
+          }
           return;
         }
         const lastCharElement = this.$refs.word.children[typedLength - 1];
@@ -1170,275 +1693,302 @@ export default {
     },
     onWordCompleted() {
       if (!this.wordHasError) {
-        this.actionLog.push(`Typed: ${this.lastCompletedWord}`)
-        this.activateNextSkill()
-        this.dealDamageToMonster()
-        this.restoreMana(10)
-        this.isDamaged = true
+        this.activateNextSkill();
+        this.dealDamageToMonster();
+        this.restoreMana(10);
+        this.isDamaged = true;
         setTimeout(() => {
-          this.isDamaged = false
-        }, 100)
+          this.isDamaged = false;
+        }, 100);
       } else {
-        this.actionLog.push(`Error in word: ${this.lastCompletedWord}`)
-        this.takeMonsterDamage()
-        this.playerDamaged = true
+        this.takeMonsterDamage("word error");
+        this.playerDamaged = true;
         setTimeout(() => {
-          this.playerDamaged = false
-        }, 100)
+          this.playerDamaged = false;
+        }, 100);
         if (this.activeSkills.includes(13)) {
-          this.skillData.defenseBuffActive = true
-          this.temporaryEffects.defenseBonus += 5
+          this.skillData.defenseBuffActive = true;
+          this.temporaryEffects.defenseBonus += 5;
           setTimeout(() => {
-            this.skillData.defenseBuffActive = false
-            this.temporaryEffects.defenseBonus = Math.max(0, this.temporaryEffects.defenseBonus - 5)
-          }, 3000)
+            this.skillData.defenseBuffActive = false;
+            this.temporaryEffects.defenseBonus = Math.max(
+              0,
+              this.temporaryEffects.defenseBonus - 5,
+            );
+          }, 3000);
         }
       }
     },
     activateNextSkill() {
-      if (this.skillQueue.length === 0) return
-      const skillId = this.skillQueue.shift()
-      this.startSkillCooldown(skillId)
-      this.processSkill(skillId)
-      this.skillQueue.push(skillId)
-      this.actionLog.push(`Skill #${skillId} activated`)
+      if (this.skillQueue.length === 0) return;
+      const skillId = this.skillQueue.shift();
+      this.startSkillCooldown(skillId);
+      this.processSkill(skillId);
+      this.skillQueue.push(skillId);
+      const skillName = this.skillsInfo[skillId]?.name || `#${skillId}`;
+      this.actionLog.push(`skill ${skillName}\nactivated`);
     },
     getSkillIcon(skillId) {
-      return skillIcons[skillId] || ''
+      return skillIcons[skillId] || "";
     },
     openSkillInfo(skillId) {
-      this.selectedSkill = this.skillsInfo[skillId]
+      this.selectedSkill = this.skillsInfo[skillId];
       if (this.selectedSkill) {
-        this.showSkillModal = true
+        this.showSkillModal = true;
       }
     },
     isSkillOnCooldown(skillId) {
-      return this.skillCooldowns[skillId] && this.skillCooldowns[skillId] > 0
+      return this.skillCooldowns[skillId] && this.skillCooldowns[skillId] > 0;
     },
     getSkillCooldown(skillId) {
-      return Math.ceil(this.skillCooldowns[skillId] || 0)
+      return Math.ceil(this.skillCooldowns[skillId] || 0);
     },
     startSkillCooldown(skillId) {
-      this.skillCooldowns[skillId] = this.cooldownDuration
+      this.skillCooldowns[skillId] = this.cooldownDuration;
       const interval = setInterval(() => {
         if (this.skillCooldowns[skillId] > 0) {
-          this.skillCooldowns[skillId] -= 0.1
+          this.skillCooldowns[skillId] -= 0.1;
         } else {
-          this.skillCooldowns[skillId] = 0
-          clearInterval(interval)
+          this.skillCooldowns[skillId] = 0;
+          clearInterval(interval);
         }
-      }, 100)
+      }, 100);
     },
     processSkill(skillId) {
       switch (skillId) {
         case 1:
-          this.temporaryEffects.damageMultiplier += Math.floor(this.wpm / 10) * 0.01
-          break
+          this.temporaryEffects.damageMultiplier +=
+            Math.floor(this.wpm / 10) * 0.01;
+          break;
         case 2:
           if (this.combo > 5) {
-            this.temporaryEffects.critChanceBonus += 0.05
+            this.temporaryEffects.critChanceBonus += 0.05;
           }
-          break
+          break;
         case 3:
           if (this.accuracy > 95) {
-            this.temporaryEffects.critMultiplierBonus += 0.15
+            this.temporaryEffects.critMultiplierBonus += 0.15;
           }
-          break
+          break;
         case 4:
           if (this.accuracy > 90) {
-            this.temporaryEffects.damageMultiplier += 0.10
+            this.temporaryEffects.damageMultiplier += 0.1;
           }
-          break
+          break;
         case 5:
-          this.temporaryEffects.critMultiplierBonus += Math.floor(this.wpm / 50) * 0.10
-          break
+          this.temporaryEffects.critMultiplierBonus +=
+            Math.floor(this.wpm / 50) * 0.1;
+          break;
         case 7:
-          this.baseStats.agility *= 1.05
-          break
+          this.baseStats.agility *= 1.05;
+          break;
         case 8:
-          break
+          break;
         case 10:
           if (this.accuracy === 100) {
-            this.temporaryEffects.defenseBonus += 10
+            this.temporaryEffects.defenseBonus += 10;
           }
-          break
+          break;
         case 12:
-          this.temporaryEffects.defenseMultiplier *= 0.8
-          this.temporaryEffects.damageMultiplier *= 0.9
-          break
+          this.temporaryEffects.defenseMultiplier *= 0.8;
+          this.temporaryEffects.damageMultiplier *= 0.9;
+          break;
         case 13:
-          break
+          break;
         case 14:
           if (this.combo > 5) {
-            this.baseStats.blockChance += 0.05
+            this.baseStats.blockChance += 0.05;
           }
-          break
+          break;
         case 15:
-          break
+          break;
         case 16:
           if (this.playerMana >= 50) {
-            this.playerMana -= 50
-            this.temporaryEffects.willReflectDamage = true
+            this.playerMana -= 50;
+            this.actionLog.push(`player spend\n50 mana`);
+            this.temporaryEffects.willReflectDamage = true;
           }
-          break
+          break;
         case 18:
           if (this.accuracy > 95) {
-            this.temporaryEffects.manaGainMultiplier += 0.10
+            this.temporaryEffects.manaGainMultiplier += 0.1;
           }
-          break
+          break;
         case 19:
-          this.temporaryEffects.manaGainMultiplier += Math.floor(this.wpm / 10) * 0.01
-          break
+          this.temporaryEffects.manaGainMultiplier +=
+            Math.floor(this.wpm / 10) * 0.01;
+          break;
         case 20:
           if (this.playerMana >= 50) {
-            this.playerMana -= 50
-            this.temporaryEffects.isInvulnerable = true
+            this.playerMana -= 50;
+            this.actionLog.push(`player spend\n50 mana`);
+            this.temporaryEffects.isInvulnerable = true;
           }
-          break
+          break;
         case 21:
-          this.temporaryEffects.damageMultiplier += Math.floor(this.playerMana / 100) * 0.01
-          break
+          this.temporaryEffects.damageMultiplier +=
+            Math.floor(this.playerMana / 100) * 0.01;
+          break;
         case 23:
           if (this.playerMana >= 100) {
-            this.playerMana -= 100
-            const fireballDamage = this.monsterHp * 0.05
-            this.monsterHp = Math.max(0, this.monsterHp - fireballDamage)
-            this.actionLog.push(`Fireball dealt ${fireballDamage.toFixed(1)} damage!`)
+            this.playerMana -= 100;
+            this.actionLog.push(`player spend\n100 mana`);
+            const fireballDamage = Math.round(this.monsterHp * 0.05);
+            this.monsterHp = Math.max(0, this.monsterHp - fireballDamage);
+            this.actionLog.push(`player attack\nhit\n${fireballDamage} dmg`);
           }
-          break
+          break;
         case 26:
           if (this.playerMana >= 50) {
-            this.playerMana -= 50
-            this.temporaryEffects.nextAttackDamageMultiplier = 1.5
+            this.playerMana -= 50;
+            this.actionLog.push(`player spend\n50 mana`);
+            this.temporaryEffects.nextAttackDamageMultiplier = 1.5;
           }
-          break
+          break;
         case 27:
-          this.temporaryEffects.damageMultiplier += 0.10
-          break
+          this.temporaryEffects.damageMultiplier += 0.1;
+          break;
         case 29:
-          break
+          break;
         case 30:
-          break
+          break;
         case 31:
-          if (this.playerHp < this.playerMaxHp * 0.3 && !this.skillData.invulnerabilityUsed) {
-            this.temporaryEffects.isInvulnerable = true
-            this.skillData.invulnerabilityUsed = true
+          if (
+            this.playerHp < this.playerMaxHp * 0.3 &&
+            !this.skillData.invulnerabilityUsed
+          ) {
+            this.temporaryEffects.isInvulnerable = true;
+            this.skillData.invulnerabilityUsed = true;
             setTimeout(() => {
-              this.temporaryEffects.isInvulnerable = false
-            }, 2000)
+              this.temporaryEffects.isInvulnerable = false;
+            }, 2000);
           }
-          break
+          break;
         case 32:
-          this.skillData.wrathStacks += 1
-          this.temporaryEffects.damageMultiplier += 0.005
-          break
+          this.skillData.wrathStacks += 1;
+          this.temporaryEffects.damageMultiplier += 0.005;
+          break;
         case 33:
-          break
+          break;
         case 34:
           if (this.combo >= 10) {
-            this.temporaryEffects.guaranteedCritAttacksLeft = 10
+            this.temporaryEffects.guaranteedCritAttacksLeft = 10;
           }
-          break
+          break;
         default:
-          console.warn(`Unknown skill ID: ${skillId}`)
+          console.warn(`Unknown skill ID: ${skillId}`);
       }
     },
     calculateDamage() {
-      let damage = this.baseStats.damage
-      damage *= this.temporaryEffects.damageMultiplier
-      damage *= this.temporaryEffects.nextAttackDamageMultiplier
-      let isCrit = false
+      let damage = this.baseStats.damage;
+      damage *= this.temporaryEffects.damageMultiplier;
+      damage *= this.temporaryEffects.nextAttackDamageMultiplier;
+      let isCrit = false;
       if (this.temporaryEffects.guaranteedCritAttacksLeft > 0) {
-        isCrit = true
-        this.temporaryEffects.guaranteedCritAttacksLeft--
+        isCrit = true;
+        this.temporaryEffects.guaranteedCritAttacksLeft--;
       } else {
-        const critChance = this.baseStats.critChance + this.temporaryEffects.critChanceBonus
-        isCrit = Math.random() < critChance
+        const critChance =
+          this.baseStats.critChance + this.temporaryEffects.critChanceBonus;
+        isCrit = Math.random() < critChance;
       }
       if (isCrit) {
-        const critMultiplier = this.baseStats.critMultiplier + this.temporaryEffects.critMultiplierBonus
-        damage *= critMultiplier
-        this.actionLog.push(`CRITICAL HIT!`)
+        const critMultiplier =
+          this.baseStats.critMultiplier +
+          this.temporaryEffects.critMultiplierBonus;
+        damage *= critMultiplier;
         if (this.activeSkills.includes(8)) {
-          this.baseStats.blockChance += 0.04
+          this.baseStats.blockChance += 0.04;
         }
       }
-      this.temporaryEffects.nextAttackDamageMultiplier = 1.0
-      return Math.round(damage)
+      this.temporaryEffects.nextAttackDamageMultiplier = 1.0;
+      return { damage: Math.round(damage), isCrit };
     },
     dealDamageToMonster() {
-      const damage = this.calculateDamage()
-      this.monsterHp = Math.max(0, this.monsterHp - damage)
-      this.totalDamageDealt += damage
-      this.actionLog.push(`Dealt ${damage} damage to monster!`)
+      const { damage, isCrit } = this.calculateDamage();
+      this.monsterHp = Math.max(0, this.monsterHp - damage);
+      this.totalDamageDealt += damage;
+      const hitType = isCrit ? "crit" : "hit";
+      this.actionLog.push(`player attack\n${hitType}\n${damage} dmg`);
       if (this.monsterHp <= 0) {
-        this.monstersDefeated.push(this.monsterLevel)
-        this.actionLog.push(`Monster defeated!`)
+        this.monstersDefeated.push(this.monsterLevel);
         if (this.typedText.length < this.currentText.length) {
-          this.monsterLevel++
+          this.monsterLevel++;
           setTimeout(async () => {
-            await this.spawnMonster()
-          }, 500)
+            await this.spawnMonster();
+          }, 500);
         }
       }
     },
-    takeMonsterDamage() {
+    takeMonsterDamage(reason = "word error") {
       if (this.temporaryEffects.isInvulnerable) {
-        this.actionLog.push(`Shield absorbed the damage!`)
-        this.temporaryEffects.isInvulnerable = false
-        return
+        this.actionLog.push(`${reason}\nmonster attack\nmiss`);
+        this.temporaryEffects.isInvulnerable = false;
+        return;
       }
       if (Math.random() < this.baseStats.blockChance) {
-        this.actionLog.push(`Blocked monster attack!`)
         if (this.activeSkills.includes(15)) {
-          this.temporaryEffects.nextAttackDamageMultiplier = 1.3
+          this.temporaryEffects.nextAttackDamageMultiplier = 1.3;
         }
         if (this.temporaryEffects.willReflectDamage) {
-          const reflectedDamage = this.monsterStats.damage
-          this.monsterHp = Math.max(0, this.monsterHp - reflectedDamage)
-          this.actionLog.push(`Reflected ${reflectedDamage.toFixed(1)} damage!`)
-          this.temporaryEffects.willReflectDamage = false
+          const reflectedDamage = Math.round(this.monsterStats.damage);
+          this.monsterHp = Math.max(0, this.monsterHp - reflectedDamage);
+          this.actionLog.push(
+            `${reason}\nmonster attack\nblocked by player\n${reflectedDamage} dmg`,
+          );
+          this.temporaryEffects.willReflectDamage = false;
+        } else {
+          this.actionLog.push(`${reason}\nmonster attack\nblocked by player`);
         }
-        return
+        return;
       }
-      let damage = this.monsterStats.damage
-      damage *= this.temporaryEffects.defenseMultiplier
-      damage = Math.max(1, damage - this.baseStats.defense - this.temporaryEffects.defenseBonus)
-      this.playerHp = Math.max(0, this.playerHp - damage)
-      this.totalDamageTaken += damage
-      this.actionLog.push(`Took ${damage.toFixed(1)} damage!`)
+      let damage = this.monsterStats.damage;
+      damage *= this.temporaryEffects.defenseMultiplier;
+      damage = Math.max(
+        1,
+        damage - this.baseStats.defense - this.temporaryEffects.defenseBonus,
+      );
+      this.playerHp = Math.max(0, this.playerHp - damage);
+      this.totalDamageTaken += damage;
+      this.actionLog.push(
+        `${reason}\nmonster attack\nhit\n${Math.round(damage)} dmg`,
+      );
       if (this.playerHp <= 0) {
-        this.actionLog.push(`You were defeated!`)
         setTimeout(async () => {
-          await this.submitGameResults()
-        }, 1000)
+          await this.submitGameResults();
+        }, 1000);
       }
     },
     restoreMana(amount) {
-      const restoredAmount = amount * this.temporaryEffects.manaGainMultiplier
-      this.playerMana = Math.min(this.playerMaxMana, this.playerMana + restoredAmount)
+      const restoredAmount = amount * this.temporaryEffects.manaGainMultiplier;
+      this.playerMana = Math.min(
+        this.playerMaxMana,
+        this.playerMana + restoredAmount,
+      );
+      this.actionLog.push(`player gain\n${Math.round(restoredAmount)} mana`);
     },
     resetGame() {
-      this.typedText = ""
-      this.startTime = null
-      this.wpm = 0
-      this.accuracy = 0
-      this.combo = 0
-      this.errors = 0
-      this.correctChars = 0
-      this.totalChars = 0
-      this.currentWordIndex = 0
-      this.lastCompletedWord = ''
-      this.isDamaged = false
-      this.currentWord = ''
-      this.wordHasError = false
-      this.actionLog = []
-      this.playerDamaged = false
-      this.cursorPosition = 0
-      this.cursorTop = 0
-      this.playerHp = this.playerMaxHp
-      this.playerMana = this.playerMaxMana
-      this.monsterHp = this.monsterMaxHp
+      this.typedText = "";
+      this.currentSegmentIndex = 0;
+      this.startTime = null;
+      this.wpm = 0;
+      this.accuracy = 0;
+      this.combo = 0;
+      this.errors = 0;
+      this.correctChars = 0;
+      this.totalChars = 0;
+      this.currentWordIndex = 0;
+      this.lastCompletedWord = "";
+      this.isDamaged = false;
+      this.currentWord = "";
+      this.wordHasError = false;
+      this.actionLog = [];
+      this.playerDamaged = false;
+      this.cursorPosition = 0;
+      this.cursorTop = 0;
+      this.playerHp = this.playerMaxHp;
+      this.playerMana = this.playerMaxMana;
+      this.monsterHp = this.monsterMaxHp;
       this.temporaryEffects = {
         damageMultiplier: 1.0,
         critChanceBonus: 0,
@@ -1450,86 +2000,128 @@ export default {
         isInvulnerable: false,
         willReflectDamage: false,
         guaranteedCritAttacksLeft: 0,
-      }
+      };
       this.skillData = {
         wrathStacks: 0,
         defenseBuffActive: false,
         blockBuffActive: false,
         invulnerabilityUsed: false,
-      }
-      this.skillQueue = [...this.activeSkills]
-      this.skillCooldowns = {}
+      };
+      this.skillQueue = [...this.activeSkills];
+      this.skillCooldowns = {};
     },
     async loadSoundPack() {
       try {
-        const configResponse = await fetch('/src/assets/sounds/config.json')
-        const packData = await configResponse.json()
-        const keyDefineType = packData.key_define_type
-        const soundFile = packData.sound
-        const defines = packData.defines
-        if (keyDefineType === 'single') {
-          const soundPath = `/src/assets/sounds/${soundFile}`
+        const configResponse = await fetch("/src/assets/sounds/config.json");
+        const packData = await configResponse.json();
+        const keyDefineType = packData.key_define_type;
+        const soundFile = packData.sound;
+        const defines = packData.defines;
+        if (keyDefineType === "single") {
+          const soundPath = `/src/assets/sounds/${soundFile}`;
           const sound = new Howl({
             src: [soundPath],
             sprite: defines,
-            volume: this.soundVolume / 100
-          })
+            volume: this.soundVolume / 100,
+          });
           this.soundPack = {
             ...packData,
-            sound: sound
-          }
-          console.log('Sound pack loaded successfully')
+            sound: sound,
+          };
+          console.log("Sound pack loaded successfully");
         } else {
-          const soundData = {}
+          const soundData = {};
           for (const kc in defines) {
             if (defines[kc]) {
-              const soundPath = `/src/assets/sounds/${defines[kc]}`
+              const soundPath = `/src/assets/sounds/${defines[kc]}`;
               soundData[kc] = new Howl({
                 src: [soundPath],
-                volume: this.soundVolume / 100
-              })
+                volume: this.soundVolume / 100,
+              });
             }
           }
           this.soundPack = {
             ...packData,
-            sound: soundData
-          }
-          console.log('Sound pack loaded successfully')
+            sound: soundData,
+          };
+          console.log("Sound pack loaded successfully");
         }
       } catch (error) {
-        console.error('Failed to load sound pack:', error)
+        console.error("Failed to load sound pack:", error);
       }
     },
     playKeySound(keyCode) {
-      if (!this.soundEnabled || !this.soundPack) return
-      const playType = this.soundPack.key_define_type || 'single'
-      const sound = playType === 'single' ? this.soundPack.sound : this.soundPack.sound[keyCode]
-      if (!sound) return
-      sound.volume(this.soundVolume / 100)
-      if (playType === 'single') {
-        sound.play(keyCode)
+      if (localStorage.getItem("soundEnabled") === "false") return;
+      if (!this.soundEnabled || !this.soundPack) return;
+      const playType = this.soundPack.key_define_type || "single";
+      const sound =
+        playType === "single"
+          ? this.soundPack.sound
+          : this.soundPack.sound[keyCode];
+      if (!sound) return;
+      sound.volume(this.soundVolume / 100);
+      if (playType === "single") {
+        sound.play(keyCode);
       } else {
-        sound.play()
+        sound.play();
       }
     },
     getKeyCode(e) {
       const keyMap = {
-        'Digit1': '1', 'Digit2': '2', 'Digit3': '3', 'Digit4': '4', 'Digit5': '5',
-        'Digit6': '6', 'Digit7': '7', 'Digit8': '8', 'Digit9': '9', 'Digit0': '10',
-        'Minus': '11', 'Equal': '12', 'Backspace': '13',
-        'KeyQ': '14', 'KeyW': '15', 'KeyE': '16', 'KeyR': '17', 'KeyT': '18',
-        'KeyY': '19', 'KeyU': '20', 'KeyI': '21', 'KeyO': '22', 'KeyP': '23',
-        'BracketLeft': '24', 'BracketRight': '25', 'Backslash': '26',
-        'KeyA': '27', 'KeyS': '28', 'KeyD': '29', 'KeyF': '30', 'KeyG': '31',
-        'KeyH': '32', 'KeyJ': '33', 'KeyK': '34', 'KeyL': '35', 'Semicolon': '36',
-        'Quote': '37', 'Enter': '38',
-        'ShiftLeft': '39', 'KeyZ': '40', 'KeyX': '41', 'KeyC': '42', 'KeyV': '43',
-        'KeyB': '44', 'KeyN': '45', 'KeyM': '46', 'Comma': '47', 'Period': '48',
-        'Slash': '49', 'ShiftRight': '50',
-        'Space': '51'
-      }
-      return keyMap[e.code] || null
+        Digit1: "1",
+        Digit2: "2",
+        Digit3: "3",
+        Digit4: "4",
+        Digit5: "5",
+        Digit6: "6",
+        Digit7: "7",
+        Digit8: "8",
+        Digit9: "9",
+        Digit0: "10",
+        Minus: "11",
+        Equal: "12",
+        Backspace: "13",
+        KeyQ: "14",
+        KeyW: "15",
+        KeyE: "16",
+        KeyR: "17",
+        KeyT: "18",
+        KeyY: "19",
+        KeyU: "20",
+        KeyI: "21",
+        KeyO: "22",
+        KeyP: "23",
+        BracketLeft: "24",
+        BracketRight: "25",
+        Backslash: "26",
+        KeyA: "27",
+        KeyS: "28",
+        KeyD: "29",
+        KeyF: "30",
+        KeyG: "31",
+        KeyH: "32",
+        KeyJ: "33",
+        KeyK: "34",
+        KeyL: "35",
+        Semicolon: "36",
+        Quote: "37",
+        Enter: "38",
+        ShiftLeft: "39",
+        KeyZ: "40",
+        KeyX: "41",
+        KeyC: "42",
+        KeyV: "43",
+        KeyB: "44",
+        KeyN: "45",
+        KeyM: "46",
+        Comma: "47",
+        Period: "48",
+        Slash: "49",
+        ShiftRight: "50",
+        Space: "51",
+      };
+      return keyMap[e.code] || null;
     },
-  }
-}
+  },
+};
 </script>
