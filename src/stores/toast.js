@@ -6,7 +6,7 @@ export const useToastStore = defineStore('toast', {
   }),
   
   actions: {
-    show({ message, type = 'info', duration = 3000, frameType = 'generic-card-horizontal' }) {
+    show({ message, type = 'info', duration = 3000, frameType = 'toast-base' }) {
       const id = Date.now() + Math.random()
       
       const toast = {

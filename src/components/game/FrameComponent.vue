@@ -54,6 +54,7 @@ import InventoryFrame from "@/assets/images/frames/inventory-frame.png";
 import ShopFrame from "@/assets/images/frames/shop-frame.png";
 import VerticalCard from "@/assets/images/frames/vertical-card.png";
 import Bar from "@/assets/images/healthbars/bar-transparent.png";
+import Toast from "@/assets/images/frames/toast.png"
 const frameSettings = {
   "forge-inventory-frame": {
     contentStyle: {
@@ -62,6 +63,14 @@ const frameSettings = {
       height: "calc(100% - 12%)",
     },
     image: ForgeInventoryFrame,
+  },
+  "toast-base": {
+    contentStyle: {
+      padding: '2rem 0rem 0rem 2rem',
+      height: 'calc(65%)',
+      width: 'calc(84%)'
+    },
+    image: Toast
   },
   "game-big": {
     contentStyle: { zIndex: 9999, padding: "23% 0px 0px 14%", height: "44%", width: "72%" },
